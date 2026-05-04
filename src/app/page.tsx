@@ -1,29 +1,57 @@
-import Navbar from "@/components/Navbar";
-import StatsBar from "@/components/StatsBar";
-import LeaderboardFilters from "@/components/LeaderboardFilters";
-import { getBenchmarkVersions, getLeaderboard, getStats } from "@/lib/api";
+import FooterV9 from "@/components/v9/FooterV9";
+import HeroV9 from "@/components/v9/HeroV9";
+import ScoreWall, { type RawRun } from "@/components/v9/ScoreWall";
+import { getIronclawLeaderboard } from "@/lib/api";
 
-export default async function HomePage() {
-  const [entries, versions, stats] = await Promise.all([
-    getLeaderboard({ limit: 50 }),
-    getBenchmarkVersions(),
-    getStats(),
-  ]);
+export default async function V9Page() {
+  const data = await getIronclawLeaderboard();
+
+  if (!data) return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <p style={{ fontFamily: "var(--font-mono)", color: "#94A3B8" }}>Failed to load benchmark data</p>
+    </div>
+  );
+
+  const modelMap = new Map(data.models.map((m) => [m.id, m]));
+  const suiteMap = new Map(data.suites.map((s) => [s.id, s]));
+
+  const runs: RawRun[] = data.runs
+    .filter((r) => r.framework_id === "ironclaw" || r.framework_id === "openclaw")
+    .map((run) => {
+      const model = modelMap.get(run.model_id);
+      const suite = suiteMap.get(run.suite_id);
+      return {
+        runId:      run.run_id,
+        frameworkId: run.framework_id,
+        modelName:  model?.name      ?? run.model_id,
+        provider:   model?.provider  ?? "",
+        suite:      suite?.name      ?? run.suite_id,
+        dataset:    run.dataset,
+        passRate:   run.pass_rate,
+        avgScore:   run.avg_score,
+        costUsd:    run.total_cost_usd,
+        wallTimeMs: run.total_wall_time_ms,
+        totalTasks: run.total_tasks,
+        scoreSum:   run.avg_score * run.total_tasks,
+        valueScore: run.value_score,
+        isOfficial: run.is_official,
+        tasks: (run.tasks ?? []).map((t) => ({
+          taskId:    t.task_id,
+          score:     t.score,
+          label:     t.label,
+          costUsd:   t.cost_usd,
+          wallTimeMs: t.wall_time_ms,
+          tokens:    t.tokens,
+          error:     t.error,
+        })),
+      };
+    });
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <Navbar />
-      <main className="mx-auto max-w-7xl px-6 py-8 flex flex-col gap-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
-          <StatsBar stats={stats} />
-        </div>
-        {entries.length === 0 ? (
-          <p className="text-zinc-500 text-sm">No hay datos disponibles en este momento.</p>
-        ) : (
-          <LeaderboardFilters entries={entries} versions={versions} />
-        )}
-      </main>
-    </div>
+    <>
+      <HeroV9 />
+      <ScoreWall runs={runs} generatedAt={data.generated_at} />
+      <FooterV9 />
+    </>
   );
 }

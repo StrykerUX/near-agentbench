@@ -1,3 +1,4 @@
+import FooterV9 from "@/components/v9/FooterV9";
 import HeroV9 from "@/components/v9/HeroV9";
 import ScoreWall, { type RawRun } from "@/components/v9/ScoreWall";
 import { getIronclawLeaderboard } from "@/lib/api";
@@ -50,6 +51,7 @@ export default async function V9Page() {
     <>
       <HeroV9 />
       <ScoreWall runs={runs} generatedAt={data.generated_at} />
+      <FooterV9 />
     </>
   );
 }

@@ -13,6 +13,13 @@ function formatCost(usd?: number) {
   return `$${usd.toFixed(usd < 0.01 ? 4 : 2)}`;
 }
 
+const HIGHLIGHT_COLORS: Record<SortTab, string> = {
+  score: "var(--accent)",
+  speed: "var(--accent-blue)",
+  cost:  "var(--warning)",
+  value: "var(--accent)",
+};
+
 type Props = {
   entry: LeaderboardEntry;
   rank: number;
@@ -21,48 +28,144 @@ type Props = {
 
 export default function ModelCard({ entry, rank, sortTab }: Props) {
   const scorePercent = entry.best_score_percentage * 100;
-  const avgPercent = entry.average_score_percentage * 100;
+  const avgPercent   = entry.average_score_percentage * 100;
+  const hlColor      = HIGHLIGHT_COLORS[sortTab];
 
   const highlightValue =
     sortTab === "speed"
       ? formatTime(entry.best_execution_time_seconds)
       : sortTab === "cost"
         ? formatCost(entry.best_cost_usd)
-        : sortTab === "value"
-          ? entry.best_cost_usd
-            ? `${formatCost(entry.best_cost_usd)} / ${Math.round(scorePercent)}%`
-            : "—"
+        : sortTab === "value" && entry.best_cost_usd
+          ? `${formatCost(entry.best_cost_usd)} / ${scorePercent.toFixed(0)}%`
           : null;
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4 flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-zinc-500 font-mono">#{rank}</span>
-        <span className="text-sm font-semibold text-white truncate">{entry.model}</span>
-        {entry.provider && (
-          <span className="ml-auto shrink-0 rounded bg-zinc-800 px-2 py-0.5 text-xs text-zinc-400">
-            {entry.provider}
+    <div
+      className="instrument-card"
+      style={{
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        gap: 14,
+        position: "relative",
+        overflow: "hidden",
+        borderLeft: `3px solid ${hlColor}`,
+      }}
+    >
+      {/* Rank watermark */}
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 8,
+          right: 12,
+          fontFamily: "var(--font-display)",
+          fontWeight: 800,
+          fontSize: 32,
+          color: hlColor,
+          opacity: 0.1,
+          lineHeight: 1,
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      >
+        #{rank}
+      </span>
+
+      {/* Model name + provider */}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, paddingRight: 32 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
+          <span style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 600,
+            fontSize: 13,
+            color: "var(--text)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
+            {entry.model}
           </span>
-        )}
+          {entry.provider && (
+            <span style={{
+              display: "inline-block",
+              alignSelf: "flex-start",
+              fontFamily: "var(--font-mono)",
+              fontSize: 9,
+              color: "var(--text-muted)",
+              border: "1px solid var(--border)",
+              borderRadius: 999,
+              padding: "1px 8px",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+            }}>
+              {entry.provider}
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="flex items-center justify-center py-2">
-        <CircularGauge percentage={scorePercent} size={90} />
+      {/* Gauge */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <CircularGauge percentage={scorePercent} />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+          {/* Highlight value if non-score tab */}
+          {highlightValue && (
+            <div style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 12,
+              color: hlColor,
+              fontWeight: 500,
+            }}>
+              {highlightValue}
+            </div>
+          )}
+
+          {/* Stats */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <div style={{ display: "flex", gap: 4 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.07em" }}>COST</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-data)", marginLeft: "auto" }}>
+                {formatCost(entry.best_cost_usd)}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 4 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.07em" }}>TIME</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-data)", marginLeft: "auto" }}>
+                {formatTime(entry.best_execution_time_seconds)}
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 4 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.07em" }}>AVG</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-data)", marginLeft: "auto" }}>
+                {avgPercent.toFixed(1)}%
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 4 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.07em" }}>RUNS</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-data)", marginLeft: "auto" }}>
+                {entry.submission_count}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {highlightValue && (
-        <div className="text-center text-xs text-orange-400 font-medium">{highlightValue}</div>
-      )}
-
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-zinc-400">
-        <span>Cost: <span className="text-zinc-200">{formatCost(entry.best_cost_usd)}</span></span>
-        <span>Time: <span className="text-zinc-200">{formatTime(entry.best_execution_time_seconds)}</span></span>
-        <span>Submissions: <span className="text-zinc-200">{entry.submission_count}</span></span>
-        <span>Avg score: <span className="text-zinc-200">{avgPercent.toFixed(1)}%</span></span>
-      </div>
-
-      <div className="text-center text-xs text-zinc-600 font-mono truncate">
-        {entry.best_submission_id}
+      {/* Submission ID footer */}
+      <div style={{
+        borderTop: "1px solid var(--border)",
+        paddingTop: 8,
+        fontFamily: "var(--font-mono)",
+        fontSize: 8,
+        color: "var(--text-muted)",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        letterSpacing: "0.04em",
+      }}>
+        + {entry.best_submission_id}
       </div>
     </div>
   );

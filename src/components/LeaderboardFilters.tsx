@@ -3,13 +3,14 @@
 import { useState } from "react";
 import ModelCard from "./ModelCard";
 import LeaderboardTable from "./LeaderboardTable";
+import GsapScrollReveal from "./GsapScrollReveal";
 import type { BenchmarkVersion, LeaderboardEntry, SortTab, ViewMode } from "@/lib/types";
 
 const TABS: { id: SortTab; label: string }[] = [
-  { id: "score", label: "Success Rate" },
-  { id: "speed", label: "Speed" },
-  { id: "cost", label: "Cost" },
-  { id: "value", label: "Value" },
+  { id: "score",  label: "Success Rate" },
+  { id: "speed",  label: "Speed"        },
+  { id: "cost",   label: "Cost"         },
+  { id: "value",  label: "Value"        },
 ];
 
 function sortEntries(entries: LeaderboardEntry[], tab: SortTab): LeaderboardEntry[] {
@@ -43,72 +44,143 @@ type Props = {
   versions: BenchmarkVersion[];
 };
 
-export default function LeaderboardFilters({ entries, versions }: Props) {
-  const [tab, setTab] = useState<SortTab>("score");
+// Icon components
+function GridIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="8" y="1" width="5" height="5" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="1" y="8" width="5" height="5" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="8" y="8" width="5" height="5" rx="1" fill="currentColor" opacity="0.7"/>
+    </svg>
+  );
+}
+
+function TableIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1" y="1" width="12" height="3" rx="1" fill="currentColor" opacity="0.7"/>
+      <rect x="1" y="6" width="12" height="2" rx="0.5" fill="currentColor" opacity="0.5"/>
+      <rect x="1" y="10" width="12" height="2" rx="0.5" fill="currentColor" opacity="0.5"/>
+    </svg>
+  );
+}
+
+export default function LeaderboardFilters({ entries, versions: _versions }: Props) {
+  const [tab,  setTab]  = useState<SortTab>("score");
   const [view, setView] = useState<ViewMode>("cards");
 
   const sorted = sortEntries(entries, tab);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex rounded-lg border border-zinc-800 overflow-hidden text-sm">
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Controls row */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        {/* Sort tabs */}
+        <div style={{
+          display: "flex",
+          gap: 4,
+          border: "1px solid var(--border)",
+          borderRadius: 999,
+          padding: 3,
+          backgroundColor: "var(--bg-card)",
+        }}>
           {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`px-4 py-2 transition-colors ${
-                tab === t.id
-                  ? "bg-zinc-700 text-white"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white"
-              }`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "5px 14px",
+                borderRadius: 999,
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                fontWeight: tab === t.id ? 600 : 400,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                transition: "background-color 150ms ease, color 150ms ease",
+                backgroundColor: tab === t.id ? "var(--accent)" : "transparent",
+                color: tab === t.id ? "var(--bg)" : "var(--text-muted)",
+              }}
             >
+              {tab === t.id && <span>+</span>}
               {t.label}
             </button>
           ))}
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
-          {versions.length > 0 && (
-            <select className="rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-300 focus:outline-none">
-              <option value="">All Versions</option>
-              {versions.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-          )}
+        {/* Spacer */}
+        <div style={{ flex: 1 }} />
 
-          <div className="flex rounded-lg border border-zinc-700 overflow-hidden text-sm">
+        {/* View toggle */}
+        <div style={{
+          display: "flex",
+          gap: 3,
+          border: "1px solid var(--border)",
+          borderRadius: 6,
+          padding: 3,
+          backgroundColor: "var(--bg-card)",
+        }}>
+          {(["cards", "table"] as ViewMode[]).map((v) => (
             <button
-              onClick={() => setView("cards")}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "cards"
-                  ? "bg-zinc-700 text-white"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white"
-              }`}
+              key={v}
+              onClick={() => setView(v)}
+              title={v === "cards" ? "Card view" : "Table view"}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 30,
+                height: 28,
+                borderRadius: 4,
+                border: "none",
+                cursor: "pointer",
+                transition: "background-color 150ms ease, color 150ms ease",
+                backgroundColor: view === v ? "rgba(0,236,151,0.12)" : "transparent",
+                color: view === v ? "var(--accent)" : "var(--text-muted)",
+              }}
             >
-              Cards
+              {v === "cards" ? <GridIcon /> : <TableIcon />}
             </button>
-            <button
-              onClick={() => setView("table")}
-              className={`px-3 py-1.5 transition-colors ${
-                view === "table"
-                  ? "bg-zinc-700 text-white"
-                  : "bg-zinc-900 text-zinc-400 hover:text-white"
-              }`}
-            >
-              Table
-            </button>
-          </div>
+          ))}
         </div>
       </div>
 
+      {/* Result count */}
+      <div style={{
+        fontFamily: "var(--font-mono)",
+        fontSize: 10,
+        color: "var(--text-muted)",
+        letterSpacing: "0.05em",
+      }}>
+        {sorted.length} {sorted.length === 1 ? "MODEL" : "MODELS"} · SORTED BY{" "}
+        <span style={{ color: "var(--accent)" }}>
+          {TABS.find(t => t.id === tab)?.label.toUpperCase()}
+        </span>
+      </div>
+
+      {/* Content */}
       {view === "cards" ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          gap: 12,
+        }}>
           {sorted.map((entry, i) => (
-            <ModelCard key={entry.best_submission_id} entry={entry} rank={i + 1} sortTab={tab} />
+            <GsapScrollReveal key={entry.best_submission_id}>
+              <ModelCard entry={entry} rank={i + 1} sortTab={tab} />
+            </GsapScrollReveal>
           ))}
         </div>
       ) : (

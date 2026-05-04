@@ -1,10 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 
 const ORANGE = "#E8801A";
-const BG     = "#111111";
+const BG     = "#000000";
 
 // Pixel-art 4×4 icon that echoes the logo in the screenshot
 function PixelIcon() {
@@ -148,25 +146,23 @@ export default function HeroV9() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
         textAlign: "center",
         padding: "40px 24px 80px",
+        height: "calc(100vh - 72px)",
+        minHeight: 640,
         gap: 0,
       }}>
 
-        {/* Pixel art image */}
-        <div style={{ width: "100%", maxWidth: 760, marginBottom: 48 }}>
-          <Image
-            src="/agent-bench-img.webp"
-            alt="AgentBench — AI agents waiting at a pixel-art bus stop"
-            width={760}
-            height={440}
-            priority
-            style={{
-              width: "100%",
-              height: "auto",
-              imageRendering: "pixelated",
-              borderRadius: 4,
-            }}
+        {/* Hero video */}
+        <div style={{ width: "100%", maxWidth: 760, marginBottom: 8 }}>
+          <video
+            src="/AgentBench-animation.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{ width: "100%", height: "auto", borderRadius: 4, display: "block" }}
           />
         </div>
 

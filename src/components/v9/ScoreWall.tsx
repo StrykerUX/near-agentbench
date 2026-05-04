@@ -496,8 +496,13 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
   const date = new Date(generatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div style={{ backgroundColor: "#181818", minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "64px 40px 96px" }}>
+    <div style={{ backgroundColor: "#000000", padding: "48px 32px 120px" }}>
+      <div style={{
+        maxWidth: 1120, margin: "0 auto",
+        backgroundColor: "#181818",
+        borderRadius: 28,
+        padding: "48px 40px 48px",
+      }}>
 
         {/* ── Section header ──────────────────────────────────────────────── */}
         <div style={{ marginBottom: 48 }}>
@@ -554,14 +559,61 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
           ))}
         </div>
 
-        {/* Footer */}
-        <div style={{ marginTop: 56, borderTop: "1px solid #222", paddingTop: 24, display: "flex", justifyContent: "center", gap: 12, alignItems: "center" }}>
-          <div style={{ width: 6, height: 6, backgroundColor: "#E8A045" }} />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#333", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-            Powered by NEAR AI
-          </span>
-          <div style={{ width: 6, height: 6, backgroundColor: "#00EC97" }} />
+        {/* ── CTA Banner ──────────────────────────────────────────────────── */}
+        <div style={{
+          marginTop: 40,
+          backgroundColor: "#1E1E1E",
+          borderRadius: 14,
+          padding: "28px 36px",
+          display: "flex",
+          alignItems: "center",
+          gap: 24,
+        }}>
+          {/* Trophy emoji */}
+          <div style={{ fontSize: 64, lineHeight: 1, flexShrink: 0, userSelect: "none" }}>
+            🏆
+          </div>
+
+          {/* Text */}
+          <div style={{ flex: 1 }}>
+            <p style={{
+              margin: "0 0 6px",
+              fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 20,
+              color: "#FFFFFF", lineHeight: 1.2,
+            }}>
+              Ready to benchmark your agent?
+            </p>
+            <p style={{
+              margin: 0,
+              fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 14,
+              color: "#777777", lineHeight: 1.5,
+            }}>
+              Join the community of builders pushing<br />
+              the boundaries of AI agents.
+            </p>
+          </div>
+
+          {/* CTA Button */}
+          <a
+            href="#get-started"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0,
+              backgroundColor: "#C96A1A",
+              color: "#FFFFFF",
+              fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 16,
+              padding: "16px 36px",
+              borderRadius: 10,
+              textDecoration: "none",
+              letterSpacing: "-0.01em",
+              transition: "opacity 150ms",
+            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.85"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
+          >
+            Get Started <span style={{ fontSize: 18 }}>→</span>
+          </a>
         </div>
+
       </div>
 
       {selected && <TaskModal run={selected} onClose={() => setSelected(null)} />}

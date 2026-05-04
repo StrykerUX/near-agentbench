@@ -1,20 +1,43 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, DM_Sans, DM_Mono, Press_Start_2P, Anton } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const dmMono = DM_Mono({
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const anton = Anton({
+  weight: "400",
+  variable: "--font-condensed",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const pressStart2P = Press_Start_2P({
+  weight: "400",
+  variable: "--font-pixel",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "near agentbench",
-  description: "Leaderboard de benchmarks para modelos de IA",
+  title: "NEAR AgentBench",
+  description: "Competitive benchmark for AI agents on NEAR Protocol",
 };
 
 export default function RootLayout({
@@ -23,7 +46,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      className={`${spaceGrotesk.variable} ${dmSans.variable} ${dmMono.variable} ${pressStart2P.variable} ${anton.variable}`}
+    >
       <body>{children}</body>
     </html>
   );
