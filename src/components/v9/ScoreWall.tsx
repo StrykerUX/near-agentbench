@@ -51,8 +51,8 @@ export interface RawRun {
 
 type SortKey = "score" | "speed" | "cost" | "value";
 
-// ── Pixel Gauge (v2 style, adapted per framework) ─────────────────────────────
-const TOTAL = 10;
+// ── Pixel Gauge ───────────────────────────────────────────────────────────────
+const TOTAL = 14;
 
 function blockColor(index: number, colors: [string, string]): string {
   const t  = index / (TOTAL - 1);
@@ -75,29 +75,28 @@ function PixelGauge({ percentage, frameworkId }: { percentage: number; framework
     const blocks = Array.from(containerRef.current.querySelectorAll<HTMLDivElement>("[data-filled]"));
     gsap.fromTo(
       blocks,
-      { scaleY: 0, transformOrigin: "50% 100%" },
-      { scaleY: 1, duration: 0.25, stagger: 0.07, ease: "back.out(1.4)" }
+      { scaleX: 0, transformOrigin: "0% 50%" },
+      { scaleX: 1, duration: 0.3, stagger: 0.05, ease: "back.out(1.2)" }
     );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pct]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <div ref={containerRef} style={{ display: "flex", gap: 2, alignItems: "flex-end" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div ref={containerRef} style={{ display: "flex", gap: 3, alignItems: "center" }}>
         {Array.from({ length: TOTAL }, (_, i) => (
           <div
             key={i}
             {...(i < filled ? { "data-filled": true } : {})}
             style={{
-              width: 8, height: i < filled ? 14 : 10,
-              backgroundColor: i < filled ? blockColor(i, colors) : "rgba(255,255,255,0.07)",
+              width: 18, height: 12,
+              backgroundColor: i < filled ? blockColor(i, colors) : "rgba(255,255,255,0.08)",
               flexShrink: 0,
-              imageRendering: "pixelated",
             }}
           />
         ))}
       </div>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: "0.06em" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#666", letterSpacing: "0.04em" }}>
         {Math.round(pct)}%
       </span>
     </div>
@@ -262,121 +261,142 @@ function TaskModal({ run, onClose }: { run: RawRun; onClose: () => void }) {
   );
 }
 
-// ── Score Card (v2 style) ─────────────────────────────────────────────────────
-function ScoreCard({ run, rank, sortKey, onClick }: { run: RawRun; rank: number; sortKey: SortKey; onClick: () => void }) {
-  const color      = fwColor(run.frameworkId);
-  const accentColor = SORT_COLOR[sortKey];
+// ── Score Card ────────────────────────────────────────────────────────────────
+function ScoreCard({ run, rank, onClick }: { run: RawRun; rank: number; sortKey: SortKey; onClick: () => void }) {
+  const color = fwColor(run.frameworkId);
 
   return (
     <div
       onClick={onClick}
       style={{
-        backgroundColor: CARD_BG,
-        border: `2px solid ${BORDER}`,
-        borderLeft: `4px solid ${color}`,
-        padding: "18px 18px 14px",
-        display: "flex", flexDirection: "column", gap: 14,
+        backgroundColor: "#1C1C1C",
+        border: `2px solid ${color}`,
+        borderRadius: 14,
+        padding: "22px 24px 18px",
+        display: "flex", flexDirection: "column", gap: 16,
         position: "relative", cursor: "pointer",
-        transition: "transform 80ms step-start, box-shadow 80ms step-start, border-color 80ms step-start",
+        transition: "box-shadow 200ms, transform 200ms",
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLDivElement;
-        el.style.transform      = "translate(-2px,-2px)";
-        el.style.boxShadow      = `4px 4px 0 ${color}33`;
-        el.style.borderColor    = color;
-        el.style.borderLeftColor = color;
+        el.style.boxShadow = `0 0 24px ${color}33`;
+        el.style.transform = "translateY(-2px)";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLDivElement;
-        el.style.transform      = "none";
-        el.style.boxShadow      = "none";
-        el.style.borderColor    = BORDER;
-        el.style.borderLeftColor = color;
+        el.style.boxShadow = "none";
+        el.style.transform = "none";
       }}
     >
       {/* Rank watermark */}
       <span aria-hidden style={{
-        position: "absolute", top: 8, right: 12,
-        fontFamily: "var(--font-condensed)", fontSize: 52,
-        color: accentColor, opacity: 0.06,
+        position: "absolute", top: 12, right: 20,
+        fontFamily: "var(--font-condensed)", fontSize: 72,
+        color: "#FFFFFF", opacity: 0.05,
         lineHeight: 1, pointerEvents: "none", userSelect: "none",
+        letterSpacing: "-0.02em",
       }}>
         #{rank}
       </span>
 
-      {/* Top: framework badge */}
+      {/* Top: framework badge + OFFICIAL */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ width: 8, height: 8, backgroundColor: color }} />
-        <span style={{ fontFamily: "var(--font-pixel)", fontSize: 7, color, letterSpacing: "0.08em" }}>
+        <div style={{ width: 12, height: 12, backgroundColor: color, borderRadius: 2, flexShrink: 0 }} />
+        <span style={{
+          fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
+          color, letterSpacing: "0.01em",
+        }}>
           {fwLabel(run.frameworkId)}
         </span>
         {run.isOfficial && (
           <span style={{
-            fontFamily: "var(--font-pixel)", fontSize: 5, color: "#00EC97",
-            border: "1px solid #00EC9733", padding: "1px 4px", marginLeft: "auto",
+            fontFamily: "var(--font-mono)", fontSize: 9, color: "#00EC97",
+            border: "1px solid #00EC97", padding: "2px 7px",
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            marginLeft: "auto",
           }}>OFFICIAL</span>
         )}
       </div>
 
-      {/* Model + provider */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingRight: 36 }}>
+      {/* Model name + provider chip */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingRight: 48 }}>
         <span style={{
-          fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: TEXT,
+          fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 19,
+          color: "#FFFFFF", lineHeight: 1.2,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>
           {run.modelName}
         </span>
-        <span style={{
-          display: "inline-block", alignSelf: "flex-start",
-          fontFamily: "var(--font-mono)", fontSize: 8, color: "#555",
-          border: `1px solid ${BORDER}`, padding: "2px 7px",
-          textTransform: "uppercase", letterSpacing: "0.07em",
-        }}>
-          {run.provider}
-        </span>
+        {run.provider && (
+          <span style={{
+            display: "inline-block", alignSelf: "flex-start",
+            fontFamily: "var(--font-mono)", fontSize: 9, color: "#777",
+            border: "1px solid #333", borderRadius: 4,
+            padding: "3px 10px",
+            textTransform: "uppercase", letterSpacing: "0.1em",
+          }}>
+            {run.provider}
+          </span>
+        )}
       </div>
 
       {/* Hero score */}
-      <div>
-        <div style={{ fontFamily: "var(--font-condensed)", fontSize: 56, color, lineHeight: 1, marginBottom: 8 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{
+          fontFamily: "var(--font-condensed)", fontSize: 56,
+          color, lineHeight: 0.9, letterSpacing: "-0.02em",
+        }}>
           {(run.passRate * 100).toFixed(0)}%
         </div>
         <PixelGauge percentage={run.passRate * 100} frameworkId={run.frameworkId} />
       </div>
 
-      {/* Suite chip */}
+      {/* Suite / dataset */}
       <span style={{
-        fontFamily: "var(--font-pixel)", fontSize: 6, color: MUTED2,
+        fontFamily: "var(--font-mono)", fontSize: 10, color: "#555",
         letterSpacing: "0.08em", textTransform: "uppercase",
       }}>
         {run.suite} · {run.dataset}
       </span>
 
-      {/* Stats grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 12px" }}>
+      {/* Stats 2×2 grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 12, columnGap: 16 }}>
         {[
           { label: "COST",  value: fmtCost(run.costUsd) },
           { label: "TIME",  value: fmtTime(run.wallTimeMs) },
           { label: "AVG",   value: run.avgScore.toFixed(3) },
           { label: "TASKS", value: `${run.scoreSum.toFixed(1)}/${run.totalTasks}` },
         ].map((s) => (
-          <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontFamily: "var(--font-pixel)", fontSize: 6, color: MUTED2, letterSpacing: "0.1em" }}>
+          <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 9, color: "#555",
+              letterSpacing: "0.1em", textTransform: "uppercase",
+            }}>
               {s.label}
             </span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: "#AAAAAA", fontWeight: 500 }}>
               {s.value}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Footer run ID */}
-      <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 7, color: MUTED3, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", letterSpacing: "0.04em" }}>
-          ▶ {run.runId}
+      {/* Footer: run ID + DETAILS */}
+      <div style={{
+        borderTop: "1px solid #2A2A2A", paddingTop: 12,
+        display: "flex", alignItems: "center", gap: 10,
+      }}>
+        <span style={{
+          fontFamily: "var(--font-mono)", fontSize: 9, color: "#3A3A3A",
+          flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          letterSpacing: "0.03em",
+        }}>
+          ▪ {run.runId}
         </span>
-        <span style={{ fontFamily: "var(--font-pixel)", fontSize: 5, color: color, letterSpacing: "0.08em", flexShrink: 0 }}>
+        <span style={{
+          fontFamily: "var(--font-mono)", fontSize: 10, color,
+          fontWeight: 600, letterSpacing: "0.06em", flexShrink: 0,
+        }}>
           DETAILS →
         </span>
       </div>
@@ -476,49 +496,71 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
   const date = new Date(generatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
-    <div style={{ backgroundColor: BG, minHeight: "100vh" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px 80px" }}>
-        {/* Heading */}
-        <div style={{ marginBottom: 40 }}>
-          {/* Pixel ruler */}
-          <div style={{ display: "flex", gap: 2, marginBottom: 20 }}>
-            {["#E8A045","#00EC97","#2979FF","#FFB800","#E8A045","#00EC97"].map((c, i) => (
-              <div key={i} style={{ width: 8, height: 8, backgroundColor: c }} />
+    <div style={{ backgroundColor: "#181818", minHeight: "100vh" }}>
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "64px 40px 96px" }}>
+
+        {/* ── Section header ──────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 48 }}>
+          {/* Pixel color blocks */}
+          <div style={{ display: "flex", gap: 4, marginBottom: 18 }}>
+            {["#E8A045","#FFB800","#2979FF","#2979FF","#00EC97","#00EC97"].map((c, i) => (
+              <div key={i} style={{ width: 20, height: 12, backgroundColor: c }} />
             ))}
           </div>
 
-          <h1 style={{
-            margin: "0 0 8px",
-            fontFamily: "var(--font-condensed)", fontSize: 42, color: TEXT,
-            letterSpacing: "0.02em", lineHeight: 1, textTransform: "uppercase",
-          }}>
-            Leaderboard
-          </h1>
-          <p style={{ margin: 0, fontFamily: "var(--font-pixel)", fontSize: 7, color: MUTED2, letterSpacing: "0.1em" }}>
-            {runs.length} RUNS · IRONCLAW × OPENCLAW · {date}
-          </p>
+          {/* Title row */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 24 }}>
+            <div>
+              <h2 style={{
+                margin: "0 0 10px",
+                fontFamily: "var(--font-condensed)", fontSize: 56, color: "#FFFFFF",
+                letterSpacing: "0.04em", lineHeight: 1, textTransform: "uppercase",
+              }}>
+                Leaderboard
+              </h2>
+              <p style={{
+                margin: 0,
+                fontFamily: "var(--font-mono)", fontSize: 11, color: "#555",
+                letterSpacing: "0.1em", textTransform: "uppercase",
+              }}>
+                {runs.length} RUNS · IRONCLAW × OPENCLAW · {date}
+              </p>
+            </div>
+
+            {/* View all button */}
+            <a
+              href="#leaderboard"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0,
+                fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 14,
+                color: "#00EC97", border: "1px solid #00EC97",
+                borderRadius: 8, padding: "10px 20px",
+                textDecoration: "none", letterSpacing: "0.01em",
+                transition: "background-color 150ms",
+                marginTop: 4,
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#00EC9715"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent"; }}
+            >
+              View all leaderboard <span style={{ fontSize: 16 }}>→</span>
+            </a>
+          </div>
         </div>
 
-        {/* Color rule */}
-        <div style={{ height: 2, display: "flex", marginBottom: 32, overflow: "hidden" }}>
-          <div style={{ flex: 1, backgroundColor: "#E8A045" }} />
-          <div style={{ flex: 1, backgroundColor: "#00EC97" }} />
-        </div>
-
-        {/* Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 14 }}>
+        {/* ── Cards grid ──────────────────────────────────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 20 }}>
           {sorted.map((run, i) => (
             <ScoreCard key={run.runId} run={run} rank={i + 1} sortKey={sort} onClick={() => setSelected(run)} />
           ))}
         </div>
 
         {/* Footer */}
-        <div style={{ marginTop: 48, borderTop: `1px solid ${BORDER}`, paddingTop: 20, display: "flex", justifyContent: "center", gap: 12, alignItems: "center" }}>
-          <div style={{ width: 4, height: 4, backgroundColor: "#E8A045" }} />
-          <span style={{ fontFamily: "var(--font-pixel)", fontSize: 5, color: MUTED3, letterSpacing: "0.1em" }}>
-            POWERED BY NEAR AI
+        <div style={{ marginTop: 56, borderTop: "1px solid #222", paddingTop: 24, display: "flex", justifyContent: "center", gap: 12, alignItems: "center" }}>
+          <div style={{ width: 6, height: 6, backgroundColor: "#E8A045" }} />
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#333", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            Powered by NEAR AI
           </span>
-          <div style={{ width: 4, height: 4, backgroundColor: "#00EC97" }} />
+          <div style={{ width: 6, height: 6, backgroundColor: "#00EC97" }} />
         </div>
       </div>
 
