@@ -124,6 +124,33 @@ const RESPONSIVE = `
   .sw-compare-tray.open { transform: translateY(0); }
   @media (max-width: 680px) {
     .sw-card-pin { opacity: 1 !important; }
+    .sw-cmp-chips { width: 100% !important; }
+    .sw-cmp-actions { width: 100% !important; justify-content: flex-end !important; }
+    .sw-compare-tray > div { padding: 12px 16px !important; }
+  }
+  /* ── Compare modal grid ── */
+  .cmp-header { display: grid; grid-template-columns: 1fr 32px 1fr; gap: 10px; align-items: start; padding: 20px 24px; }
+  .cmp-tbl-head { display: grid; grid-template-columns: 140px 1fr 1fr 80px; gap: 12px; padding: 10px 0; border-bottom: 1px solid #2A2A2A; margin-bottom: 4px; }
+  .cmp-row { display: grid; grid-template-columns: 140px 1fr 1fr 80px; gap: 12px; padding: 13px 0; border-bottom: 1px solid #1A1A1A; align-items: center; }
+  .cmp-delta { text-align: right; }
+  .cmp-ab-label { display: none; font-size: 11px; }
+  @media (max-width: 580px) {
+    .cmp-header { grid-template-columns: 1fr !important; padding: 16px !important; }
+    .cmp-vs { padding: 0 !important; text-align: left !important; opacity: 0.5; font-size: 11px !important; }
+    .cmp-tbl-head { display: none !important; }
+    .cmp-row {
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-rows: auto auto !important;
+      gap: 4px 8px !important;
+      padding: 12px 0 !important;
+    }
+    .cmp-metric-label { grid-column: 1; grid-row: 1; }
+    .cmp-delta        { grid-column: 2; grid-row: 1; text-align: right !important; }
+    .cmp-a-val        { grid-column: 1; grid-row: 2; }
+    .cmp-b-val        { grid-column: 2; grid-row: 2; }
+    .cmp-ab-label     { display: inline !important; }
+    .cmp-tbl-wrap     { padding: 0 16px 24px !important; }
+    .cmp-topbar       { padding: 14px 16px !important; }
   }
 `;
 
@@ -407,7 +434,7 @@ function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => 
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top bar */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: `1px solid ${BORDER}` }}>
+        <div className="cmp-topbar" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: `1px solid ${BORDER}` }}>
           <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: TEXT }}>
             Head-to-Head
           </span>
@@ -417,16 +444,16 @@ function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => 
         </div>
 
         {/* Model cards */}
-        <div style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 32px 1fr", gap: 10, alignItems: "center" }}>
+        <div className="cmp-header">
           <ModelCard run={a} label="BASELINE"   color={colorA} />
-          <div style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2 }}>vs</div>
+          <div className="cmp-vs" style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2 }}>vs</div>
           <ModelCard run={b} label="COMPARISON" color={colorB} />
         </div>
 
         {/* Metrics table */}
-        <div style={{ padding: "0 24px 28px" }}>
-          {/* Header row */}
-          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr 80px", gap: 12, padding: "10px 0 10px", borderBottom: `1px solid ${BORDER}`, marginBottom: 4 }}>
+        <div className="cmp-tbl-wrap" style={{ padding: "0 24px 28px" }}>
+          {/* Header row — hidden on mobile via CSS */}
+          <div className="cmp-tbl-head">
             {[["METRIC", "left"], ["BASELINE", "left"], ["COMPARISON", "left"], ["DELTA", "right"]].map(([h, align]) => (
               <span key={h} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, letterSpacing: "0.08em", textAlign: align as "left" | "right" }}>
                 {h}
@@ -434,17 +461,19 @@ function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => 
             ))}
           </div>
           {metrics.map((m) => (
-            <div key={m.label} style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr 80px", gap: 12, padding: "13px 0", borderBottom: `1px solid #1A1A1A`, alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "#D4D4D4" }}>
+            <div key={m.label} className="cmp-row">
+              <span className="cmp-metric-label" style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "#D4D4D4" }}>
                 {m.label}
               </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
+              <span className="cmp-a-val" style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
+                <span className="cmp-ab-label" style={{ color: MUTED2, marginRight: 4 }}>A</span>
                 {m.aVal}
               </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
+              <span className="cmp-b-val" style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
+                <span className="cmp-ab-label" style={{ color: MUTED2, marginRight: 4 }}>B</span>
                 {m.bVal}
               </span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: deltaColor(m), textAlign: "right" }}>
+              <span className="cmp-delta" style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: deltaColor(m) }}>
                 {m.fmtDelta}
               </span>
             </div>
@@ -474,7 +503,7 @@ function CompareTray({
     <div className={`sw-compare-tray${isOpen ? " open" : ""}`}>
       <div style={{ maxWidth: 1120, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         {/* Chips */}
-        <div style={{ display: "flex", gap: 8, flex: 1, flexWrap: "wrap", alignItems: "center" }}>
+        <div className="sw-cmp-chips" style={{ display: "flex", gap: 8, flex: 1, flexWrap: "wrap", alignItems: "center" }}>
           {selection.map((run) => (
             <div key={run.runId} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
@@ -494,14 +523,14 @@ function CompareTray({
             </div>
           ))}
           {!canCompare && (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2, letterSpacing: "0.04em" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED, letterSpacing: "0.04em" }}>
               {selection.length === 0 ? "" : "Select one more to compare…"}
             </span>
           )}
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+        <div className="sw-cmp-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
           <button
             onClick={onClear}
             style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px 14px", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED, letterSpacing: "0.04em" }}
