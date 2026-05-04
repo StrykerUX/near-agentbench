@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, DM_Sans, DM_Mono, Press_Start_2P, Anton, Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
@@ -57,7 +59,11 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${dmMono.variable} ${pressStart2P.variable} ${anton.variable} ${inter.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <Navbar />
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
