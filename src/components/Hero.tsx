@@ -27,6 +27,16 @@ const RESPONSIVE = `
       min-width: unset !important;
     }
   }
+  @media (max-height: 700px) {
+    .hw-hero {
+      height: auto !important;
+      min-height: unset !important;
+      padding-top: 20px !important;
+      padding-bottom: 32px !important;
+    }
+    .hw-video { max-height: 35vh !important; overflow: hidden !important; }
+    .hw-video video { height: 35vh !important; width: auto !important; max-width: 100% !important; object-fit: contain !important; }
+  }
 `;
 
 // Pixel-art 4×4 icon that echoes the logo in the screenshot
@@ -77,10 +87,23 @@ const NAV_ITEMS = [
 
 export default function Hero() {
   return (
-    <div style={{ backgroundColor: BG, color: "#FFFFFF", fontFamily: "var(--font-sans)" }}>
+    <div style={{ position: "relative", backgroundColor: BG, color: "#FFFFFF", fontFamily: "var(--font-sans)" }}>
       <style>{RESPONSIVE}</style>
 
+      {/* Grid background — covers navbar + hero */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
+        backgroundSize: "56px 56px",
+        WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
+        maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
+        pointerEvents: "none",
+        zIndex: 0,
+      }} />
+
       {/* ── Navbar ─────────────────────────────────────────────────────────── */}
+      <div style={{ position: "sticky", top: 0, zIndex: 40 }}>
       <nav
         className="hw-nav"
         style={{
@@ -152,6 +175,7 @@ export default function Hero() {
           </a>
         </div>
       </nav>
+      </div>
 
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <section
@@ -168,9 +192,8 @@ export default function Hero() {
           gap: 0,
         }}
       >
-
         {/* Hero video */}
-        <div style={{ width: "100%", maxWidth: 760, marginBottom: 8 }}>
+        <div className="hw-video" style={{ width: "100%", maxWidth: 760, marginBottom: -16 }}>
           <video
             src="/AgentBench-animation.mp4"
             autoPlay

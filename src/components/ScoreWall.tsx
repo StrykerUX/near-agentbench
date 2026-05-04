@@ -857,23 +857,6 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
               </p>
             </div>
 
-            {/* View all button */}
-            <a
-              href="#leaderboard"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0,
-                fontFamily: "var(--font-sans)", fontWeight: 500, fontSize: 14,
-                color: "#00EC97", border: "1px solid #00EC97",
-                borderRadius: 8, padding: "10px 20px",
-                textDecoration: "none", letterSpacing: "0.01em",
-                transition: "background-color 150ms",
-                marginTop: 4,
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#00EC9715"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent"; }}
-            >
-              View all leaderboard <span style={{ fontSize: 16 }}>→</span>
-            </a>
           </div>
         </div>
 
