@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, DM_Sans, DM_Mono, Press_Start_2P, Anton } from "next/font/google";
+import { Space_Grotesk, DM_Sans, DM_Mono, Press_Start_2P, Anton, Inter } from "next/font/google";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -28,6 +28,13 @@ const anton = Anton({
   display: "swap",
 });
 
+const inter = Inter({
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const pressStart2P = Press_Start_2P({
   weight: "400",
   variable: "--font-pixel",
@@ -48,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} ${dmMono.variable} ${pressStart2P.variable} ${anton.variable}`}
+      className={`${spaceGrotesk.variable} ${dmSans.variable} ${dmMono.variable} ${pressStart2P.variable} ${anton.variable} ${inter.variable}`}
     >
       <body>{children}</body>
     </html>
