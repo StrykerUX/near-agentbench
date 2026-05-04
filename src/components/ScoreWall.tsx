@@ -218,7 +218,7 @@ function LabelChip({ label }: { label: string }) {
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
 function TaskModal({ run, onClose }: { run: RawRun; onClose: () => void }) {
-  const color  = fwColor(run.frameworkId);
+  const color  = trafficColor(run.passRate);
   const colors = fwBlocks(run.frameworkId);
   const sorted = [...run.tasks].sort((a, b) => b.score - a.score);
 
@@ -353,52 +353,48 @@ function TaskModal({ run, onClose }: { run: RawRun; onClose: () => void }) {
 
 // ── Compare Modal ─────────────────────────────────────────────────────────────
 function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => void }) {
-  const metrics: { label: string; aVal: string; bVal: string; delta: string; better: "higher" | "lower" }[] = [
-    {
-      label: "Pass Rate",
-      aVal: `${(a.passRate * 100).toFixed(1)}%`,
-      bVal: `${(b.passRate * 100).toFixed(1)}%`,
-      delta: `${((b.passRate - a.passRate) * 100).toFixed(1)}%`,
-      better: "higher",
-    },
-    {
-      label: "Avg Score",
-      aVal: a.avgScore.toFixed(3),
-      bVal: b.avgScore.toFixed(3),
-      delta: (b.avgScore - a.avgScore).toFixed(3),
-      better: "higher",
-    },
-    {
-      label: "Cost",
-      aVal: fmtCost(a.costUsd),
-      bVal: fmtCost(b.costUsd),
-      delta: `${b.costUsd - a.costUsd >= 0 ? "+" : ""}${fmtCost(Math.abs(b.costUsd - a.costUsd))}`,
-      better: "lower",
-    },
-    {
-      label: "Time",
-      aVal: fmtTime(a.wallTimeMs),
-      bVal: fmtTime(b.wallTimeMs),
-      delta: `${b.wallTimeMs - a.wallTimeMs >= 0 ? "+" : "-"}${fmtTime(Math.abs(b.wallTimeMs - a.wallTimeMs))}`,
-      better: "lower",
-    },
-    {
-      label: "Value Score",
-      aVal: Math.round(a.valueScore).toLocaleString(),
-      bVal: Math.round(b.valueScore).toLocaleString(),
-      delta: `${b.valueScore - a.valueScore >= 0 ? "+" : ""}${Math.round(b.valueScore - a.valueScore).toLocaleString()}`,
-      better: "higher",
-    },
+  const colorA = trafficColor(a.passRate);
+  const colorB = trafficColor(b.passRate);
+
+  type Metric = { label: string; aVal: string; bVal: string; rawDelta: number; fmtDelta: string; better: "higher" | "lower" };
+  const metrics: Metric[] = [
+    { label: "Pass Rate",   aVal: `${(a.passRate * 100).toFixed(1)}%`,        bVal: `${(b.passRate * 100).toFixed(1)}%`,        rawDelta: b.passRate - a.passRate,           fmtDelta: `${((b.passRate - a.passRate) * 100).toFixed(1)}%`,                                                                              better: "higher" },
+    { label: "Avg Score",   aVal: a.avgScore.toFixed(3),                       bVal: b.avgScore.toFixed(3),                       rawDelta: b.avgScore - a.avgScore,            fmtDelta: (b.avgScore - a.avgScore).toFixed(3),                                                                                              better: "higher" },
+    { label: "Cost",        aVal: fmtCost(a.costUsd),                          bVal: fmtCost(b.costUsd),                          rawDelta: a.costUsd - b.costUsd,              fmtDelta: `${b.costUsd - a.costUsd >= 0 ? "+" : ""}${fmtCost(Math.abs(b.costUsd - a.costUsd))}`,                                           better: "lower"  },
+    { label: "Time",        aVal: fmtTime(a.wallTimeMs),                       bVal: fmtTime(b.wallTimeMs),                       rawDelta: a.wallTimeMs - b.wallTimeMs,        fmtDelta: `${b.wallTimeMs - a.wallTimeMs >= 0 ? "+" : "-"}${fmtTime(Math.abs(b.wallTimeMs - a.wallTimeMs))}`,                               better: "lower"  },
+    { label: "Value Score", aVal: Math.round(a.valueScore).toLocaleString(),   bVal: Math.round(b.valueScore).toLocaleString(),   rawDelta: b.valueScore - a.valueScore,        fmtDelta: `${b.valueScore - a.valueScore >= 0 ? "+" : ""}${Math.round(b.valueScore - a.valueScore).toLocaleString()}`,                      better: "higher" },
   ];
 
-  const deltaColor = (m: typeof metrics[0]) => {
-    const raw = parseFloat(m.delta.replace(/[^0-9.\-]/g, "")) || 0;
-    const bIsBetter = m.better === "higher" ? raw > 0 : raw < 0;
-    const bIsWorse  = m.better === "higher" ? raw < 0 : raw > 0;
-    if (bIsBetter) return TRAFFIC_GREEN;
-    if (bIsWorse)  return TRAFFIC_RED;
+  const deltaColor = (m: Metric) => {
+    if (m.rawDelta > 0) return m.better === "higher" ? TRAFFIC_GREEN : TRAFFIC_RED;
+    if (m.rawDelta < 0) return m.better === "higher" ? TRAFFIC_RED : TRAFFIC_GREEN;
     return MUTED;
   };
+
+  const ModelCard = ({ run, label, color }: { run: RawRun; label: string; color: string }) => (
+    <div style={{ background: "#111", border: `1px solid ${color}44`, borderTop: `2px solid ${color}`, borderRadius: 8, padding: "14px 16px", minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+        <div style={{ width: 7, height: 7, backgroundColor: fwColor(run.frameworkId), borderRadius: 2, flexShrink: 0 }} />
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: fwColor(run.frameworkId), letterSpacing: "0.06em" }}>
+          {fwLabel(run.frameworkId)}
+        </span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, marginLeft: "auto", letterSpacing: "0.06em" }}>
+          {label}
+        </span>
+      </div>
+      <p style={{ margin: "0 0 4px", fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: TEXT, lineHeight: 1.3, wordBreak: "break-word" }}>
+        {run.modelName}
+      </p>
+      {run.provider && (
+        <p style={{ margin: "0 0 12px", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED }}>
+          {run.provider}
+        </p>
+      )}
+      <div style={{ fontFamily: "var(--font-inter)", fontWeight: 600, fontSize: 32, color, letterSpacing: "0.04em", lineHeight: 1 }}>
+        {(run.passRate * 100).toFixed(0)}%
+      </div>
+    </div>
+  );
 
   return (
     <div
@@ -407,67 +403,39 @@ function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => 
     >
       <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.88)" }} />
       <div
-        style={{
-          position: "relative", zIndex: 1,
-          backgroundColor: CARD_BG,
-          border: `1px solid ${BORDER}`,
-          borderTop: `3px solid #FFFFFF`,
-          width: "100%", maxWidth: 640,
-          maxHeight: "90vh", overflowY: "auto",
-          borderRadius: 4,
-        }}
+        style={{ position: "relative", zIndex: 1, backgroundColor: CARD_BG, border: `1px solid ${BORDER}`, width: "100%", maxWidth: 620, maxHeight: "90vh", overflowY: "auto", borderRadius: 4 }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, backgroundColor: CARD_BG, zIndex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: TEXT }}>
-              Head-to-Head
-            </span>
-            <button onClick={onClose} style={{ background: "none", border: `1px solid ${BORDER}`, padding: "4px 10px", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2, letterSpacing: "0.06em" }}>
-              ESC
-            </button>
-          </div>
-          {/* Two-column model headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", gap: 8, alignItems: "center" }}>
-            {[a, b].map((run, idx) => (
-              <div key={run.runId} style={{ background: "#111", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "12px 14px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                  <div style={{ width: 8, height: 8, backgroundColor: fwColor(run.frameworkId), borderRadius: 2, flexShrink: 0 }} />
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: fwColor(run.frameworkId), letterSpacing: "0.06em" }}>
-                    {fwLabel(run.frameworkId)}
-                  </span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, marginLeft: "auto" }}>
-                    {idx === 0 ? "BASELINE" : "COMPARISON"}
-                  </span>
-                </div>
-                <p style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {run.modelName}
-                </p>
-                {run.provider && (
-                  <p style={{ margin: "4px 0 0", fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED }}>
-                    {run.provider}
-                  </p>
-                )}
-              </div>
-            ))}
-            <div style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 13, color: MUTED2 }}>vs</div>
-          </div>
+        {/* Top bar */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: `1px solid ${BORDER}` }}>
+          <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: TEXT }}>
+            Head-to-Head
+          </span>
+          <button onClick={onClose} style={{ background: "none", border: `1px solid ${BORDER}`, padding: "5px 11px", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 16, color: MUTED, borderRadius: 4, lineHeight: 1 }}>
+            ✕
+          </button>
+        </div>
+
+        {/* Model cards */}
+        <div style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 32px 1fr", gap: 10, alignItems: "center" }}>
+          <ModelCard run={a} label="BASELINE"   color={colorA} />
+          <div style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2 }}>vs</div>
+          <ModelCard run={b} label="COMPARISON" color={colorB} />
         </div>
 
         {/* Metrics table */}
-        <div style={{ padding: "0 24px 24px" }}>
-          {/* Column headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px", gap: 8, padding: "14px 0 8px", borderBottom: `1px solid ${BORDER}` }}>
-            {["METRIC", "BASELINE", "COMPARISON", "DELTA"].map((h) => (
-              <span key={h} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, letterSpacing: "0.08em", textAlign: h === "DELTA" ? "right" : "left" }}>
+        <div style={{ padding: "0 24px 28px" }}>
+          {/* Header row */}
+          <div style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr 80px", gap: 12, padding: "10px 0 10px", borderBottom: `1px solid ${BORDER}`, marginBottom: 4 }}>
+            {[["METRIC", "left"], ["BASELINE", "left"], ["COMPARISON", "left"], ["DELTA", "right"]].map(([h, align]) => (
+              <span key={h} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, letterSpacing: "0.08em", textAlign: align as "left" | "right" }}>
                 {h}
               </span>
             ))}
           </div>
           {metrics.map((m) => (
-            <div key={m.label} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px", gap: 8, padding: "14px 0", borderBottom: `1px solid #1E1E1E`, alignItems: "center" }}>
-              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: TEXT }}>
+            <div key={m.label} style={{ display: "grid", gridTemplateColumns: "140px 1fr 1fr 80px", gap: 12, padding: "13px 0", borderBottom: `1px solid #1A1A1A`, alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: "#D4D4D4" }}>
                 {m.label}
               </span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
@@ -477,7 +445,7 @@ function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => 
                 {m.bVal}
               </span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: deltaColor(m), textAlign: "right" }}>
-                {m.delta}
+                {m.fmtDelta}
               </span>
             </div>
           ))}
@@ -598,15 +566,6 @@ function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
         el.style.transform = "none";
       }}
     >
-      {/* Compare pin button */}
-      <button
-        onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
-        className={`sw-card-pin${isPinned ? " pinned" : ""}`}
-        title={isPinned ? "Remove from comparison" : "Add to comparison"}
-      >
-        {isPinned ? "✓" : "+"}
-      </button>
-
       {/* Rank watermark */}
       <span aria-hidden style={{
         position: "absolute", top: 12, right: 20,
@@ -699,7 +658,7 @@ function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
         ))}
       </div>
 
-      {/* Footer: run ID + DETAILS */}
+      {/* Footer: run ID + COMPARE + DETAILS */}
       <div style={{
         borderTop: "1px solid #2A2A2A", paddingTop: 12,
         display: "flex", alignItems: "center", gap: 10,
@@ -711,6 +670,19 @@ function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
         }}>
           ▪ {run.runId}
         </span>
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
+          style={{
+            background: "none", border: `1px solid ${isPinned ? color : "#666"}`,
+            borderRadius: 4, padding: "3px 10px", cursor: "pointer", flexShrink: 0,
+            fontFamily: "var(--font-mono)", fontSize: 12,
+            color: isPinned ? color : "#B0B8C8",
+            fontWeight: 600, letterSpacing: "0.06em",
+            transition: "border-color 120ms, color 120ms",
+          }}
+        >
+          {isPinned ? "ADDED ✓" : "COMPARE"}
+        </button>
         <span style={{
           fontFamily: "var(--font-mono)", fontSize: 12, color,
           fontWeight: 600, letterSpacing: "0.06em", flexShrink: 0,
@@ -818,6 +790,7 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
   const date = new Date(generatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
+  <>
     <div className="sw-outer" style={{ backgroundColor: "#000000", padding: "48px 32px 120px" }}>
       <style>{RESPONSIVE}</style>
 
@@ -957,21 +930,22 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
       </div>
 
       {selected && <TaskModal run={selected} onClose={() => setSelected(null)} />}
-
-      {compareOpen && compareSelection.length === 2 && (
-        <CompareModal
-          a={compareSelection[0]}
-          b={compareSelection[1]}
-          onClose={() => setCompareOpen(false)}
-        />
-      )}
-
-      <CompareTray
-        selection={compareSelection}
-        onRemove={(id) => setCompareSelection((prev) => prev.filter((r) => r.runId !== id))}
-        onCompare={() => setCompareOpen(true)}
-        onClear={() => { setCompareSelection([]); setCompareOpen(false); }}
-      />
     </div>
+
+    {compareOpen && compareSelection.length === 2 && (
+      <CompareModal
+        a={compareSelection[0]}
+        b={compareSelection[1]}
+        onClose={() => setCompareOpen(false)}
+      />
+    )}
+
+    <CompareTray
+      selection={compareSelection}
+      onRemove={(id) => setCompareSelection((prev) => prev.filter((r) => r.runId !== id))}
+      onCompare={() => setCompareOpen(true)}
+      onClear={() => { setCompareSelection([]); setCompareOpen(false); }}
+    />
+  </>
   );
 }
