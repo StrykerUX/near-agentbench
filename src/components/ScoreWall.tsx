@@ -93,6 +93,38 @@ const RESPONSIVE = `
     }
     .sw-ver-links { display: none !important; }
   }
+  /* ── Compare ── */
+  .sw-card-pin {
+    position: absolute; top: 10px; left: 10px;
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1C1C1C;
+    color: #666;
+    font-size: 16px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 2;
+    transition: background 120ms, color 120ms, border-color 120ms;
+    opacity: 0;
+  }
+  .sw-card:hover .sw-card-pin,
+  .sw-card-pin.pinned { opacity: 1 !important; }
+  .sw-card-pin.pinned {
+    background: #FFFFFF;
+    color: #111;
+    border-color: #FFFFFF;
+  }
+  .sw-compare-tray {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 55;
+    background: #161616;
+    border-top: 1px solid #2A2A2A;
+    transform: translateY(100%);
+    transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .sw-compare-tray.open { transform: translateY(0); }
+  @media (max-width: 680px) {
+    .sw-card-pin { opacity: 1 !important; }
+  }
 `;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -319,8 +351,224 @@ function TaskModal({ run, onClose }: { run: RawRun; onClose: () => void }) {
   );
 }
 
+// ── Compare Modal ─────────────────────────────────────────────────────────────
+function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => void }) {
+  const metrics: { label: string; aVal: string; bVal: string; delta: string; better: "higher" | "lower" }[] = [
+    {
+      label: "Pass Rate",
+      aVal: `${(a.passRate * 100).toFixed(1)}%`,
+      bVal: `${(b.passRate * 100).toFixed(1)}%`,
+      delta: `${((b.passRate - a.passRate) * 100).toFixed(1)}%`,
+      better: "higher",
+    },
+    {
+      label: "Avg Score",
+      aVal: a.avgScore.toFixed(3),
+      bVal: b.avgScore.toFixed(3),
+      delta: (b.avgScore - a.avgScore).toFixed(3),
+      better: "higher",
+    },
+    {
+      label: "Cost",
+      aVal: fmtCost(a.costUsd),
+      bVal: fmtCost(b.costUsd),
+      delta: `${b.costUsd - a.costUsd >= 0 ? "+" : ""}${fmtCost(Math.abs(b.costUsd - a.costUsd))}`,
+      better: "lower",
+    },
+    {
+      label: "Time",
+      aVal: fmtTime(a.wallTimeMs),
+      bVal: fmtTime(b.wallTimeMs),
+      delta: `${b.wallTimeMs - a.wallTimeMs >= 0 ? "+" : "-"}${fmtTime(Math.abs(b.wallTimeMs - a.wallTimeMs))}`,
+      better: "lower",
+    },
+    {
+      label: "Value Score",
+      aVal: Math.round(a.valueScore).toLocaleString(),
+      bVal: Math.round(b.valueScore).toLocaleString(),
+      delta: `${b.valueScore - a.valueScore >= 0 ? "+" : ""}${Math.round(b.valueScore - a.valueScore).toLocaleString()}`,
+      better: "higher",
+    },
+  ];
+
+  const deltaColor = (m: typeof metrics[0]) => {
+    const raw = parseFloat(m.delta.replace(/[^0-9.\-]/g, "")) || 0;
+    const bIsBetter = m.better === "higher" ? raw > 0 : raw < 0;
+    const bIsWorse  = m.better === "higher" ? raw < 0 : raw > 0;
+    if (bIsBetter) return TRAFFIC_GREEN;
+    if (bIsWorse)  return TRAFFIC_RED;
+    return MUTED;
+  };
+
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px" }}
+      onClick={onClose}
+    >
+      <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.88)" }} />
+      <div
+        style={{
+          position: "relative", zIndex: 1,
+          backgroundColor: CARD_BG,
+          border: `1px solid ${BORDER}`,
+          borderTop: `3px solid #FFFFFF`,
+          width: "100%", maxWidth: 640,
+          maxHeight: "90vh", overflowY: "auto",
+          borderRadius: 4,
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{ padding: "20px 24px 16px", borderBottom: `1px solid ${BORDER}`, position: "sticky", top: 0, backgroundColor: CARD_BG, zIndex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: TEXT }}>
+              Head-to-Head
+            </span>
+            <button onClick={onClose} style={{ background: "none", border: `1px solid ${BORDER}`, padding: "4px 10px", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2, letterSpacing: "0.06em" }}>
+              ESC
+            </button>
+          </div>
+          {/* Two-column model headers */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 40px 1fr", gap: 8, alignItems: "center" }}>
+            {[a, b].map((run, idx) => (
+              <div key={run.runId} style={{ background: "#111", border: `1px solid ${BORDER}`, borderRadius: 8, padding: "12px 14px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <div style={{ width: 8, height: 8, backgroundColor: fwColor(run.frameworkId), borderRadius: 2, flexShrink: 0 }} />
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: fwColor(run.frameworkId), letterSpacing: "0.06em" }}>
+                    {fwLabel(run.frameworkId)}
+                  </span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, marginLeft: "auto" }}>
+                    {idx === 0 ? "BASELINE" : "COMPARISON"}
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: TEXT, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {run.modelName}
+                </p>
+                {run.provider && (
+                  <p style={{ margin: "4px 0 0", fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED }}>
+                    {run.provider}
+                  </p>
+                )}
+              </div>
+            ))}
+            <div style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 13, color: MUTED2 }}>vs</div>
+          </div>
+        </div>
+
+        {/* Metrics table */}
+        <div style={{ padding: "0 24px 24px" }}>
+          {/* Column headers */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px", gap: 8, padding: "14px 0 8px", borderBottom: `1px solid ${BORDER}` }}>
+            {["METRIC", "BASELINE", "COMPARISON", "DELTA"].map((h) => (
+              <span key={h} style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, letterSpacing: "0.08em", textAlign: h === "DELTA" ? "right" : "left" }}>
+                {h}
+              </span>
+            ))}
+          </div>
+          {metrics.map((m) => (
+            <div key={m.label} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 80px", gap: 8, padding: "14px 0", borderBottom: `1px solid #1E1E1E`, alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 14, color: TEXT }}>
+                {m.label}
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
+                {m.aVal}
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, color: MUTED }}>
+                {m.bVal}
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: deltaColor(m), textAlign: "right" }}>
+                {m.delta}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Compare Tray ──────────────────────────────────────────────────────────────
+function CompareTray({
+  selection,
+  onRemove,
+  onCompare,
+  onClear,
+}: {
+  selection: RawRun[];
+  onRemove: (runId: string) => void;
+  onCompare: () => void;
+  onClear: () => void;
+}) {
+  const isOpen = selection.length > 0;
+  const canCompare = selection.length === 2;
+
+  return (
+    <div className={`sw-compare-tray${isOpen ? " open" : ""}`}>
+      <div style={{ maxWidth: 1120, margin: "0 auto", padding: "14px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        {/* Chips */}
+        <div style={{ display: "flex", gap: 8, flex: 1, flexWrap: "wrap", alignItems: "center" }}>
+          {selection.map((run) => (
+            <div key={run.runId} style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "#222", border: `1px solid ${BORDER}`,
+              borderRadius: 6, padding: "6px 10px",
+            }}>
+              <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: fwColor(run.frameworkId), flexShrink: 0 }} />
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: TEXT, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {run.modelName}
+              </span>
+              <button
+                onClick={() => onRemove(run.runId)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: MUTED, fontSize: 16, lineHeight: 1, padding: "0 0 0 2px" }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          {!canCompare && (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED2, letterSpacing: "0.04em" }}>
+              {selection.length === 0 ? "" : "Select one more to compare…"}
+            </span>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={onClear}
+            style={{ background: "none", border: `1px solid ${BORDER}`, borderRadius: 6, padding: "8px 14px", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 12, color: MUTED, letterSpacing: "0.04em" }}
+          >
+            Clear
+          </button>
+          {canCompare && (
+            <button
+              onClick={onCompare}
+              style={{
+                background: "#FFFFFF", border: "none", borderRadius: 6,
+                padding: "8px 20px", cursor: "pointer",
+                fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 600,
+                color: "#111", letterSpacing: "0.04em",
+                transition: "opacity 120ms",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+            >
+              Compare →
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Score Card ────────────────────────────────────────────────────────────────
-function ScoreCard({ run, rank, onClick }: { run: RawRun; rank: number; sortKey: SortKey; onClick: () => void }) {
+function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
+  run: RawRun; rank: number; sortKey: SortKey;
+  onClick: () => void;
+  onToggleCompare: (run: RawRun) => void;
+  isPinned: boolean;
+}) {
   const fwCol  = fwColor(run.frameworkId);
   const color  = trafficColor(run.passRate);
 
@@ -350,6 +598,15 @@ function ScoreCard({ run, rank, onClick }: { run: RawRun; rank: number; sortKey:
         el.style.transform = "none";
       }}
     >
+      {/* Compare pin button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
+        className={`sw-card-pin${isPinned ? " pinned" : ""}`}
+        title={isPinned ? "Remove from comparison" : "Add to comparison"}
+      >
+        {isPinned ? "✓" : "+"}
+      </button>
+
       {/* Rank watermark */}
       <span aria-hidden style={{
         position: "absolute", top: 12, right: 20,
@@ -538,8 +795,18 @@ function Navbar({ sortKey, onSort }: { sortKey: SortKey; onSort: (k: SortKey) =>
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; generatedAt: string }) {
-  const [sort, setSort]         = useState<SortKey>("score");
-  const [selected, setSelected] = useState<RawRun | null>(null);
+  const [sort, setSort]               = useState<SortKey>("score");
+  const [selected, setSelected]       = useState<RawRun | null>(null);
+  const [compareSelection, setCompareSelection] = useState<RawRun[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const toggleCompare = (run: RawRun) => {
+    setCompareSelection((prev) => {
+      if (prev.some((r) => r.runId === run.runId)) return prev.filter((r) => r.runId !== run.runId);
+      if (prev.length >= 2) return [prev[1], run]; // swap oldest
+      return [...prev, run];
+    });
+  };
 
   const sorted = useMemo(() => [...runs].sort((a, b) =>
     sort === "speed" ? a.wallTimeMs - b.wallTimeMs
@@ -617,7 +884,15 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
           style={{ display: "flex", flexWrap: "wrap", gap: 20, marginTop: 24 }}
         >
           {sorted.map((run, i) => (
-            <ScoreCard key={run.runId} run={run} rank={i + 1} sortKey={sort} onClick={() => setSelected(run)} />
+            <ScoreCard
+              key={run.runId}
+              run={run}
+              rank={i + 1}
+              sortKey={sort}
+              onClick={() => setSelected(run)}
+              onToggleCompare={toggleCompare}
+              isPinned={compareSelection.some((r) => r.runId === run.runId)}
+            />
           ))}
         </div>
 
@@ -682,6 +957,21 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
       </div>
 
       {selected && <TaskModal run={selected} onClose={() => setSelected(null)} />}
+
+      {compareOpen && compareSelection.length === 2 && (
+        <CompareModal
+          a={compareSelection[0]}
+          b={compareSelection[1]}
+          onClose={() => setCompareOpen(false)}
+        />
+      )}
+
+      <CompareTray
+        selection={compareSelection}
+        onRemove={(id) => setCompareSelection((prev) => prev.filter((r) => r.runId !== id))}
+        onCompare={() => setCompareOpen(true)}
+        onClear={() => { setCompareSelection([]); setCompareOpen(false); }}
+      />
     </div>
   );
 }
