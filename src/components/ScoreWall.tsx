@@ -928,21 +928,26 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
           }}
         >
           {(() => {
-            const maxVal = Math.max(...sorted.map((r) => r.valueScore), 1);
-            const minVal = Math.min(...sorted.map((r) => r.valueScore));
-            return sorted.map((run, i) => (
-              <ScoreCard
-                key={run.runId}
-                run={run}
-                rank={i + 1}
-                color={rankColor(run, sort, sorted)}
-                sortKey={sort}
-                valuePct={maxVal === minVal ? 100 : ((run.valueScore - minVal) / (maxVal - minVal)) * 100}
-                onClick={() => setSelected(run)}
-                onToggleCompare={toggleCompare}
-                isPinned={compareSelection.some((r) => r.runId === run.runId)}
-              />
-            ));
+            const values = sorted.map((r) => r.valueScore);
+            const logMin = Math.log1p(Math.min(...values));
+            const logMax = Math.log1p(Math.max(...values));
+            return sorted.map((run, i) => {
+              const logVal = Math.log1p(run.valueScore);
+              const pct    = logMax === logMin ? 100 : 10 + ((logVal - logMin) / (logMax - logMin)) * 90;
+              return (
+                <ScoreCard
+                  key={run.runId}
+                  run={run}
+                  rank={i + 1}
+                  color={rankColor(run, sort, sorted)}
+                  sortKey={sort}
+                  valuePct={pct}
+                  onClick={() => setSelected(run)}
+                  onToggleCompare={toggleCompare}
+                  isPinned={compareSelection.some((r) => r.runId === run.runId)}
+                />
+              );
+            });
           })()}
         </div>
 
