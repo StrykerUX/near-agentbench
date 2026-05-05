@@ -57,7 +57,7 @@ const COLUMNS = [
   },
   {
     heading: "Resources",
-    links: ["FAQ"],
+    links: [],
   },
   {
     heading: "Community",
@@ -107,7 +107,9 @@ export default function Footer() {
           {/* Social icons */}
           <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 4 }}>
             <a
-              href="#github"
+              href="https://github.com/nearai/benchmarks"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ display: "flex", alignItems: "center", opacity: 1, transition: "opacity 150ms" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
@@ -145,27 +147,8 @@ export default function Footer() {
         ))}
       </div>
 
-      {/* ── Bottom bar ─────────────────────────────────────────────────────── */}
-      <div style={{ borderTop: "1px solid #1E1E1E" }}>
-        <div style={{
-          maxWidth: 1120,
-          margin: "0 auto",
-          padding: "20px 40px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 14,
-        }}>
-          <div style={{ width: 10, height: 10, backgroundColor: ORANGE }} />
-          <span style={{
-            fontFamily: "var(--font-mono)", fontSize: 10,
-            color: "#444444", letterSpacing: "0.18em", textTransform: "uppercase",
-          }}>
-            Powered by NEAR AI
-          </span>
-          <div style={{ width: 10, height: 10, backgroundColor: "#00EC97" }} />
-        </div>
-      </div>
+      {/* Bottom border only */}
+      <div style={{ borderTop: "1px solid #1E1E1E", height: 1 }} />
 
     </footer>
   );
