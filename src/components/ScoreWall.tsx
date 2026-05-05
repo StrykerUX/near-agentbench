@@ -604,10 +604,10 @@ function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
 
       {/* Top: framework badge + OFFICIAL */}
       <div className="sw-badge-row" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ width: 12, height: 12, backgroundColor: fwCol, borderRadius: 2, flexShrink: 0 }} />
+        <div style={{ width: 12, height: 12, backgroundColor: "#555", borderRadius: 2, flexShrink: 0 }} />
         <span style={{
           fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
-          color: fwCol, letterSpacing: "0.01em",
+          color: "#888", letterSpacing: "0.01em",
         }}>
           {fwLabel(run.frameworkId)}
         </span>
