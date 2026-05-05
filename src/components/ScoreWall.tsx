@@ -32,6 +32,33 @@ const trafficColor = (passRate: number) =>
   : passRate >= 0.45 ? TRAFFIC_ORANGE
   : TRAFFIC_RED;
 
+// Rank-aware color: normalizes the metric across all runs and maps to traffic light
+function rankColor(run: RawRun, sortKey: SortKey, allRuns: RawRun[]): string {
+  if (allRuns.length === 0) return trafficColor(run.passRate);
+
+  let getValue: (r: RawRun) => number;
+  let higherIsBetter: boolean;
+
+  if (sortKey === "score") return trafficColor(run.passRate);
+  if (sortKey === "speed")  { getValue = (r) => r.wallTimeMs;  higherIsBetter = false; }
+  else if (sortKey === "cost")   { getValue = (r) => r.costUsd;     higherIsBetter = false; }
+  else                           { getValue = (r) => r.valueScore;  higherIsBetter = true;  }
+
+  const values = allRuns.map(getValue);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (max === min) return TRAFFIC_GREEN;
+
+  const raw = getValue(run);
+  const normalized = higherIsBetter
+    ? (raw - min) / (max - min)
+    : (max - raw) / (max - min);
+
+  return normalized >= 0.67 ? TRAFFIC_GREEN
+       : normalized >= 0.33 ? TRAFFIC_ORANGE
+       : TRAFFIC_RED;
+}
+
 // Sort accent colors
 const SORT_COLOR: Record<string, string> = {
   score: "#00EC97",
@@ -557,14 +584,13 @@ function CompareTray({
 }
 
 // ── Score Card ────────────────────────────────────────────────────────────────
-function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
-  run: RawRun; rank: number; sortKey: SortKey;
+function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
+  run: RawRun; rank: number; color: string;
   onClick: () => void;
   onToggleCompare: (run: RawRun) => void;
   isPinned: boolean;
 }) {
   const fwCol  = fwColor(run.frameworkId);
-  const color  = trafficColor(run.passRate);
 
   return (
     <div
@@ -863,7 +889,7 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
               key={run.runId}
               run={run}
               rank={i + 1}
-              sortKey={sort}
+              color={rankColor(run, sort, sorted)}
               onClick={() => setSelected(run)}
               onToggleCompare={toggleCompare}
               isPinned={compareSelection.some((r) => r.runId === run.runId)}
