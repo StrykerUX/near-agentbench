@@ -703,7 +703,7 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
         ))}
       </div>
 
-      {/* Footer: run ID + COMPARE + DETAILS */}
+      {/* Footer: run ID + DETAILS */}
       <div style={{
         borderTop: "1px solid #2A2A2A", paddingTop: 12,
         display: "flex", alignItems: "center", gap: 10,
@@ -715,19 +715,6 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
         }}>
           ▪ {run.runId}
         </span>
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
-          style={{
-            background: "none", border: `1px solid ${isPinned ? color : "#666"}`,
-            borderRadius: 4, padding: "3px 10px", cursor: "pointer", flexShrink: 0,
-            fontFamily: "var(--font-mono)", fontSize: 12,
-            color: isPinned ? color : "#B0B8C8",
-            fontWeight: 600, letterSpacing: "0.06em",
-            transition: "border-color 120ms, color 120ms",
-          }}
-        >
-          {isPinned ? "ADDED ✓" : "ADD TO COMPARE"}
-        </button>
         <span style={{
           fontFamily: "var(--font-mono)", fontSize: 12, color,
           fontWeight: 600, letterSpacing: "0.06em", flexShrink: 0,
@@ -735,6 +722,41 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
           DETAILS →
         </span>
       </div>
+
+      {/* Add to Compare row */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
+        style={{
+          display: "flex", alignItems: "center", gap: 10,
+          background: "none", border: "none", cursor: "pointer", padding: 0,
+          width: "100%",
+        }}
+      >
+        {/* Checkbox */}
+        <div style={{
+          width: 18, height: 18, flexShrink: 0,
+          border: `2px solid ${isPinned ? color : "#555"}`,
+          borderRadius: 3,
+          backgroundColor: isPinned ? color : "transparent",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "background 120ms, border-color 120ms",
+        }}>
+          {isPinned && (
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+        <span style={{
+          fontFamily: "var(--font-sans)", fontWeight: 700, fontSize: 14,
+          color: isPinned ? color : "#D4D4D4",
+          textDecoration: "underline",
+          letterSpacing: "-0.01em",
+          transition: "color 120ms",
+        }}>
+          {isPinned ? "Added" : "Add to Compare"}
+        </span>
+      </button>
     </div>
   );
 }
