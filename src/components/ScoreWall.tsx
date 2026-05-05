@@ -18,6 +18,7 @@ const MUTED3    = "#888888";
 const FW: Record<string, { main: string; blocks: [string, string] }> = {
   ironclaw: { main: "#E8A045", blocks: ["#EA580C", "#FBBF24"] },
   openclaw: { main: "#00EC97", blocks: ["#2979FF", "#00EC97"] },
+  value:    { main: "#FFB800", blocks: ["#FF6B00", "#FFB800"] },
 };
 const fwColor  = (id: string) => FW[id]?.main ?? "#555";
 const fwBlocks = (id: string): [string, string] => FW[id]?.blocks ?? ["#555", "#555"];
@@ -584,8 +585,8 @@ function CompareTray({
 }
 
 // ── Score Card ────────────────────────────────────────────────────────────────
-function ScoreCard({ run, rank, color, sortKey, onClick, onToggleCompare, isPinned }: {
-  run: RawRun; rank: number; color: string; sortKey: SortKey;
+function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompare, isPinned }: {
+  run: RawRun; rank: number; color: string; sortKey: SortKey; valuePct: number;
   onClick: () => void;
   onToggleCompare: (run: RawRun) => void;
   isPinned: boolean;
@@ -694,6 +695,7 @@ function ScoreCard({ run, rank, color, sortKey, onClick, onToggleCompare, isPinn
           {heroValue}
         </div>
         {sortKey === "score" && <PixelGauge percentage={run.passRate * 100} frameworkId={run.frameworkId} />}
+        {sortKey === "value" && <PixelGauge percentage={valuePct} frameworkId="value" />}
       </div>
 
       {/* Suite / dataset */}
@@ -925,18 +927,23 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
             marginTop: 24,
           }}
         >
-          {sorted.map((run, i) => (
-            <ScoreCard
-              key={run.runId}
-              run={run}
-              rank={i + 1}
-              color={rankColor(run, sort, sorted)}
-              sortKey={sort}
-              onClick={() => setSelected(run)}
-              onToggleCompare={toggleCompare}
-              isPinned={compareSelection.some((r) => r.runId === run.runId)}
-            />
-          ))}
+          {(() => {
+            const maxVal = Math.max(...sorted.map((r) => r.valueScore), 1);
+            const minVal = Math.min(...sorted.map((r) => r.valueScore));
+            return sorted.map((run, i) => (
+              <ScoreCard
+                key={run.runId}
+                run={run}
+                rank={i + 1}
+                color={rankColor(run, sort, sorted)}
+                sortKey={sort}
+                valuePct={maxVal === minVal ? 100 : ((run.valueScore - minVal) / (maxVal - minVal)) * 100}
+                onClick={() => setSelected(run)}
+                onToggleCompare={toggleCompare}
+                isPinned={compareSelection.some((r) => r.runId === run.runId)}
+              />
+            ));
+          })()}
         </div>
 
         {/* CTA Banner — hidden until destination is ready */}
