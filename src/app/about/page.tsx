@@ -164,21 +164,7 @@ export default function AboutPage() {
             >
               View the benchmark →
             </a>
-            <a
-              href="https://github.com/nearai/benchmarks"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                backgroundColor: "transparent", color: TEXT,
-                fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 15,
-                padding: "12px 24px", borderRadius: 8, textDecoration: "none",
-                border: `1px solid ${BORDER}`, letterSpacing: "-0.01em",
-                transition: "border-color 150ms",
-              }}
-            >
-              Read the paper →
-            </a>
+            {/* Read the paper — hidden until paper is ready */}
           </div>
         </section>
 
