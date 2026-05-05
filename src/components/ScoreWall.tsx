@@ -596,7 +596,7 @@ function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompa
   // Hero metric — changes based on active filter
   const heroValue = sortKey === "speed" ? fmtTime(run.wallTimeMs)
                   : sortKey === "cost"  ? fmtCost(run.costUsd)
-                  : sortKey === "value" ? ((valuePct / 100) * 10).toFixed(1)
+                  : sortKey === "value" ? valuePct.toFixed(2)
                   : `${(run.passRate * 100).toFixed(0)}%`;
   const heroLabel = sortKey === "speed" ? "SPEED"
                   : sortKey === "cost"  ? "COST"
