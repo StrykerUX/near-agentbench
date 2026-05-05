@@ -1,6 +1,9 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 const ORANGE = "#E8801A";
+const GITHUB_URL = "https://github.com/nearai/benchmarks";
 
 function PixelIcon() {
   const grid = [
@@ -48,7 +51,8 @@ const STYLES = `
   }
 `;
 
-export default function Navbar({ activePath = "/" }: { activePath?: string }) {
+export default function Navbar() {
+  const activePath = usePathname();
   return (
     <div style={{ position: "sticky", top: 0, zIndex: 40 }}>
       <style>{STYLES}</style>
@@ -100,9 +104,10 @@ export default function Navbar({ activePath = "/" }: { activePath?: string }) {
 
         {/* Right side */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0, marginLeft: "auto" }}>
-          <a href="#github" style={{ display: "flex", alignItems: "center", opacity: 0.9, transition: "opacity 150ms" }}>
+          <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" style={{ display: "flex", alignItems: "center", opacity: 0.9, transition: "opacity 150ms" }}>
             <GitHubIcon />
           </a>
+          {/* Get Started — hidden until destination is ready
           <a
             href="#get-started"
             className="site-nav-cta"
@@ -124,6 +129,7 @@ export default function Navbar({ activePath = "/" }: { activePath?: string }) {
             Get Started
             <span style={{ fontSize: 18, lineHeight: 1 }}>→</span>
           </a>
+          */}
         </div>
       </nav>
     </div>
