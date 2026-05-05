@@ -11,8 +11,8 @@ const CARD_BG   = "#1A1A1A";
 const BORDER    = "#2A2A2A";
 const TEXT      = "#FFFFFF";
 const MUTED     = "#888888";
-const MUTED2    = "#444444";
-const MUTED3    = "#333333";
+const MUTED2    = "#888888";
+const MUTED3    = "#888888";
 
 // Framework colors
 const FW: Record<string, { main: string; blocks: [string, string] }> = {
@@ -257,7 +257,7 @@ function LabelChip({ label }: { label: string }) {
     fail:    { bg: "#2A0F0F", color: "#FF4444" },
     pending: { bg: "#0F152A", color: "#2979FF" },
   };
-  const s = map[label] ?? { bg: "#1E1E1E", color: "#555" };
+  const s = map[label] ?? { bg: "#1E1E1E", color: "#888" };
   return (
     <span style={{
       fontFamily: "var(--font-mono)", fontSize: 10,
@@ -567,7 +567,7 @@ function CompareTray({
               padding: "8px 20px",
               cursor: canCompare ? "pointer" : "not-allowed",
               fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 600,
-              color: canCompare ? "#111" : "#555",
+              color: canCompare ? "#111" : "#888",
               letterSpacing: "0.04em",
               transition: "opacity 120ms, background 120ms",
               opacity: canCompare ? 1 : 0.5,
@@ -884,7 +884,7 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
               </h2>
               <p style={{
                 margin: 0,
-                fontFamily: "var(--font-mono)", fontSize: 11, color: "#555",
+                fontFamily: "var(--font-mono)", fontSize: 11, color: "#888",
                 letterSpacing: "0.1em", textTransform: "uppercase",
               }}>
                 {runs.length} RUNS · IRONCLAW × OPENCLAW · {date}

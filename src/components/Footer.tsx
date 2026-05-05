@@ -124,7 +124,7 @@ export default function Footer() {
           <div key={col.heading} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <span style={{
               fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 14,
-              color: "#6B7280", letterSpacing: "0.01em",
+              color: "#888888", letterSpacing: "0.01em",
             }}>
               {col.heading}
             </span>
