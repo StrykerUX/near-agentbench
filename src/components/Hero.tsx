@@ -59,7 +59,6 @@ export default function Hero() {
           justifyContent: "center",
           textAlign: "center",
           padding: "40px 24px 80px",
-          height: "calc(100vh - 72px)",
           minHeight: 640,
           gap: 0,
         }}
