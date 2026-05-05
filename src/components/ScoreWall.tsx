@@ -229,7 +229,7 @@ function PixelGauge({ percentage, frameworkId }: { percentage: number; framework
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <div ref={containerRef} style={{ display: "flex", gap: 3, alignItems: "center" }}>
+      <div ref={containerRef} style={{ display: "flex", gap: 3, alignItems: "center", overflow: "hidden" }}>
         {Array.from({ length: TOTAL }, (_, i) => (
           <div
             key={i}
