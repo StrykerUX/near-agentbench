@@ -37,17 +37,6 @@ export default function Hero() {
     <div style={{ position: "relative", backgroundColor: BG, color: "#FFFFFF", fontFamily: "var(--font-sans)" }}>
       <style>{RESPONSIVE}</style>
 
-      {/* Grid background — covers navbar + hero */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        backgroundImage: "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
-        backgroundSize: "56px 56px",
-        WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
-        maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
-        pointerEvents: "none",
-        zIndex: 0,
-      }} />
 
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <section
