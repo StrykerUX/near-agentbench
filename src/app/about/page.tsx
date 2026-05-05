@@ -39,9 +39,13 @@ function Section({ eyebrow, title, children }: { eyebrow?: string; title: string
 export default function AboutPage() {
   return (
     <main style={{ backgroundColor: BG, color: TEXT, fontFamily: "var(--font-sans)" }}>
+      <style>{`
+        @media (max-width: 1024px) { .about-wrap { padding-left: 24px !important; padding-right: 24px !important; } }
+        @media (max-width: 680px)  { .about-wrap { padding-left: 24px !important; padding-right: 24px !important; } }
+      `}</style>
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section style={{ maxWidth: 800, margin: "0 auto", padding: "80px 40px 64px" }}>
+      <section className="about-wrap" style={{ maxWidth: 800, margin: "0 auto", padding: "80px 40px 64px" }}>
         <p style={{ margin: "0 0 16px", fontFamily: "var(--font-mono)", fontSize: 12, color: ORANGE, letterSpacing: "0.12em", textTransform: "uppercase" }}>
           About
         </p>
@@ -60,7 +64,7 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 40px 120px", display: "flex", flexDirection: "column", gap: 0 }}>
+      <div className="about-wrap" style={{ maxWidth: 800, margin: "0 auto", padding: "0 40px 120px", display: "flex", flexDirection: "column", gap: 0 }}>
 
         {/* ── Why We Exist ──────────────────────────────────────────────── */}
         <Section eyebrow="Why We Exist" title="The standard benchmarks were answering the wrong question.">

@@ -71,22 +71,22 @@ const SORT_COLOR: Record<string, string> = {
 // ── Responsive styles ─────────────────────────────────────────────────────────
 const RESPONSIVE = `
   @media (max-width: 1024px) {
-    .sw-outer  { padding: 32px 16px 80px !important; }
-    .sw-inner  { padding: 32px 24px !important; border-radius: 20px !important; }
-    /* Keep cards side by side on tablet, shrink min-width to fit more per row */
-    .sw-card   { flex: 1 1 220px !important; }
+    .sw-outer  { padding: 32px 24px 80px !important; }
+    .sw-inner  { padding: 32px 28px !important; border-radius: 20px !important; }
+    .sw-grid   { grid-template-columns: repeat(2, 1fr) !important; }
   }
   @media (max-width: 680px) {
-    .sw-outer  { padding: 0 0 60px !important; }
-    .sw-inner  { padding: 24px 12px !important; border-radius: 0 !important; }
+    .sw-outer  { padding: 0 20px 60px !important; }
+    .sw-inner  { padding: 24px 20px !important; border-radius: 16px !important; }
     .sw-header { margin-bottom: 28px !important; }
     .sw-title-row {
       flex-direction: column !important;
       align-items: flex-start !important;
       gap: 14px !important;
     }
+    .sw-grid   { grid-template-columns: 1fr !important; }
     /* Card layout fixes */
-    .sw-card   { flex: 1 1 100% !important; padding: 18px 16px 14px !important; }
+    .sw-card   { padding: 18px 16px 14px !important; }
     .sw-badge-row {
       flex-wrap: wrap !important;
       gap: 6px !important;
@@ -615,7 +615,6 @@ function ScoreCard({ run, rank, color, sortKey, onClick, onToggleCompare, isPinn
       onClick={onClick}
       className="sw-card"
       style={{
-        flex: "1 1 320px",
         minWidth: 0,
         backgroundColor: "#1C1C1C",
         border: `2px solid ${color}`,
@@ -919,7 +918,12 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
         {/* ── Cards grid ──────────────────────────────────────────────────── */}
         <div
           className="sw-grid"
-          style={{ display: "flex", flexWrap: "wrap", gap: 20, marginTop: 24 }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${sorted.length <= 4 ? 2 : sorted.length <= 9 ? 3 : 4}, 1fr)`,
+            gap: 20,
+            marginTop: 24,
+          }}
         >
           {sorted.map((run, i) => (
             <ScoreCard

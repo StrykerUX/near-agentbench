@@ -6,7 +6,7 @@ const BG     = "#000000";
 const RESPONSIVE = `
   @media (max-width: 680px) {
     .hw-hero {
-      padding: 24px 16px 56px !important;
+      padding: 24px 24px 56px !important;
       height: auto !important;
       min-height: 560px !important;
     }

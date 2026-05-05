@@ -37,7 +37,8 @@ function GitHubIcon() {
 export default function Footer() {
   return (
     <footer style={{ backgroundColor: "#111111", color: "#FFFFFF", borderTop: "1px solid #1E1E1E" }}>
-      <div style={{
+      <style>{`@media (max-width: 1024px) { .fv-bar { padding: 32px 24px !important; } } @media (max-width: 680px) { .fv-bar { padding: 28px 24px !important; } }`}</style>
+      <div className="fv-bar" style={{
         maxWidth: 1120,
         margin: "0 auto",
         padding: "40px 40px",

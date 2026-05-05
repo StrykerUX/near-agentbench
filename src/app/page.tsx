@@ -69,10 +69,14 @@ export default async function V9Page() {
     if (!ironclawModelKeys.has(key)) continue;
     const existing = bestByModel.get(key);
     if (!existing) { bestByModel.set(key, entry); continue; }
-    const betterScore = entry.best_score_percentage > existing.best_score_percentage;
-    const sameScore   = entry.best_score_percentage === existing.best_score_percentage;
-    const betterCost  = sameScore && (entry.best_cost_usd ?? 0) > 0 && (existing.best_cost_usd ?? 0) === 0;
-    if (betterScore || betterCost) bestByModel.set(key, entry);
+    const entryCost    = entry.best_cost_usd    ?? 0;
+    const existingCost = existing.best_cost_usd ?? 0;
+    const entryHasCost    = entryCost > 0;
+    const existingHasCost = existingCost > 0;
+    // Prefer entries with real cost data; among those, pick highest score
+    if (entryHasCost && !existingHasCost) { bestByModel.set(key, entry); continue; }
+    if (!entryHasCost && existingHasCost) continue;
+    if (entry.best_score_percentage > existing.best_score_percentage) bestByModel.set(key, entry);
   }
 
   const pinchbenchRuns: RawRun[] = Array.from(bestByModel.values()).map((entry) => {

@@ -47,7 +47,7 @@ const STYLES = `
   @media (max-width: 680px) {
     .site-nav-links { display: none !important; }
     .site-nav-cta   { display: none !important; }
-    .site-nav       { padding: 0 16px !important; gap: 12px !important; }
+    .site-nav       { padding: 0 24px !important; gap: 12px !important; }
   }
 `;
 
