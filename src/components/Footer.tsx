@@ -43,13 +43,13 @@ export default function Footer() {
         padding: "40px 40px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
         flexWrap: "wrap",
         gap: 24,
       }}>
 
         {/* Logo + description */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center", textAlign: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <PixelIcon />
             <span style={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1, fontFamily: "var(--font-display)" }}>
