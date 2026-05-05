@@ -675,7 +675,7 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
 
       {/* Suite / dataset */}
       <span style={{
-        fontFamily: "var(--font-mono)", fontSize: 12, color: "#777",
+        fontFamily: "var(--font-mono)", fontSize: 12, color: "#888",
         letterSpacing: "0.06em", textTransform: "uppercase",
       }}>
         {run.suite} · {run.dataset}
@@ -709,7 +709,7 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
         display: "flex", alignItems: "center", gap: 10,
       }}>
         <span style={{
-          fontFamily: "var(--font-mono)", fontSize: 12, color: "#666",
+          fontFamily: "var(--font-mono)", fontSize: 12, color: "#888",
           flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           letterSpacing: "0.02em",
         }}>
