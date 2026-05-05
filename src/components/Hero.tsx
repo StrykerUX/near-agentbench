@@ -88,7 +88,7 @@ export default function Hero() {
           color: "#FFFFFF",
           fontFamily: "var(--font-display)",
         }}>
-          Evaluate. Compare. Advance.
+          Evaluate. Compare. Choose.
         </h1>
 
         {/* Sub-headline */}
@@ -118,7 +118,7 @@ export default function Hero() {
           real-world tasks, environments, and capabilities.
         </p>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons — hidden until destination pages are ready
         <div className="hw-cta-row" style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
           <a
             href="#benchmarks"
@@ -168,6 +168,7 @@ export default function Hero() {
             View Leaderboard
           </a>
         </div>
+        */}
       </section>
 
     </div>
