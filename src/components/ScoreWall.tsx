@@ -201,21 +201,26 @@ type SortKey = "score" | "speed" | "cost" | "value";
 // ── Pixel Gauge ───────────────────────────────────────────────────────────────
 const TOTAL = 14;
 
-function blockColor(index: number, colors: [string, string]): string {
-  const t  = index / (TOTAL - 1);
-  const c0 = parseInt(colors[0].slice(1), 16);
-  const c1 = parseInt(colors[1].slice(1), 16);
-  const r  = Math.round(((c0 >> 16) & 0xff) + t * (((c1 >> 16) & 0xff) - ((c0 >> 16) & 0xff)));
-  const g  = Math.round(((c0 >>  8) & 0xff) + t * (((c1 >>  8) & 0xff) - ((c0 >>  8) & 0xff)));
-  const b  = Math.round(((c0      ) & 0xff) + t * (((c1      ) & 0xff) - ((c0      ) & 0xff)));
-  return `rgb(${r},${g},${b})`;
+// Fixed spectrum: red → orange → green → blue
+const SPECTRUM = [
+  { t: 0.0,  r: 239, g: 68,  b: 68  }, // red
+  { t: 0.5,  r: 249, g: 115, b: 22  }, // orange
+  { t: 1.0,  r: 0,   g: 236, b: 151 }, // green
+];
+
+function spectrumColor(t: number): string {
+  let s0 = SPECTRUM[0], s1 = SPECTRUM[SPECTRUM.length - 1];
+  for (let i = 0; i < SPECTRUM.length - 1; i++) {
+    if (t >= SPECTRUM[i].t && t <= SPECTRUM[i + 1].t) { s0 = SPECTRUM[i]; s1 = SPECTRUM[i + 1]; break; }
+  }
+  const lt = s1.t === s0.t ? 0 : (t - s0.t) / (s1.t - s0.t);
+  return `rgb(${Math.round(s0.r + lt * (s1.r - s0.r))},${Math.round(s0.g + lt * (s1.g - s0.g))},${Math.round(s0.b + lt * (s1.b - s0.b))})`;
 }
 
-function PixelGauge({ percentage, frameworkId }: { percentage: number; frameworkId: string }) {
+function PixelGauge({ percentage }: { percentage: number }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const pct    = Math.max(0, Math.min(100, percentage));
   const filled = Math.ceil((pct / 100) * TOTAL);
-  const colors = fwBlocks(frameworkId);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -229,23 +234,17 @@ function PixelGauge({ percentage, frameworkId }: { percentage: number; framework
   }, [pct]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <div ref={containerRef} style={{ display: "flex", gap: 3, alignItems: "center", overflow: "hidden" }}>
-        {Array.from({ length: TOTAL }, (_, i) => (
-          <div
-            key={i}
-            {...(i < filled ? { "data-filled": true } : {})}
-            style={{
-              width: 18, height: 12,
-              backgroundColor: i < filled ? blockColor(i, colors) : "rgba(255,255,255,0.08)",
-              flexShrink: 0,
-            }}
-          />
-        ))}
-      </div>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#999", letterSpacing: "0.04em" }}>
-        {Math.round(pct)}%
-      </span>
+    <div ref={containerRef} style={{ display: "flex", gap: 3, alignItems: "center", overflow: "hidden" }}>
+      {Array.from({ length: TOTAL }, (_, i) => (
+        <div
+          key={i}
+          {...(i < filled ? { "data-filled": true } : {})}
+          style={{
+            width: 18, height: 12, flexShrink: 0,
+            backgroundColor: i < filled ? spectrumColor(i / (TOTAL - 1)) : "rgba(255,255,255,0.08)",
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -338,7 +337,7 @@ function TaskModal({ run, onClose }: { run: RawRun; onClose: () => void }) {
               <div style={{ fontFamily: "var(--font-inter)", fontWeight: 600, fontSize: 48, color, lineHeight: 1, letterSpacing: "0.04em", marginBottom: 6 }}>
                 {(run.passRate * 100).toFixed(0)}%
               </div>
-              <PixelGauge percentage={run.passRate * 100} frameworkId={run.frameworkId} />
+              <PixelGauge percentage={run.passRate * 100} />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 20px", flex: 1 }}>
@@ -694,8 +693,15 @@ function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompa
         }}>
           {heroValue}
         </div>
-        {sortKey === "score" && <PixelGauge percentage={run.passRate * 100} frameworkId={run.frameworkId} />}
-        {sortKey === "value" && <PixelGauge percentage={valuePct} frameworkId="value" />}
+        {sortKey === "score" && (
+          <>
+            <PixelGauge percentage={run.passRate * 100} />
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#888", letterSpacing: "0.06em" }}>
+              VALUE {valuePct.toFixed(2)}
+            </span>
+          </>
+        )}
+        {sortKey === "value" && <PixelGauge percentage={valuePct} />}
       </div>
 
       {/* Suite / dataset */}
