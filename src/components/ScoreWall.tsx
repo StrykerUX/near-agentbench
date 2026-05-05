@@ -46,6 +46,8 @@ const RESPONSIVE = `
   @media (max-width: 1024px) {
     .sw-outer  { padding: 32px 16px 80px !important; }
     .sw-inner  { padding: 32px 24px !important; border-radius: 20px !important; }
+    /* Keep cards side by side on tablet, shrink min-width to fit more per row */
+    .sw-card   { flex: 1 1 220px !important; }
   }
   @media (max-width: 680px) {
     .sw-outer  { padding: 0 0 60px !important; }
@@ -283,15 +285,7 @@ function TaskModal({ run, onClose }: { run: RawRun; onClose: () => void }) {
                 }}>
                   {fwLabel(run.frameworkId)}
                 </span>
-                {run.isOfficial && (
-                  <span style={{
-                    fontFamily: "var(--font-pixel)", fontSize: 5,
-                    color: "#00EC97", border: "1px solid #00EC9733",
-                    padding: "2px 5px", letterSpacing: "0.06em",
-                  }}>
-                    OFFICIAL
-                  </span>
-                )}
+                {/* OFFICIAL badge hidden */}
               </div>
               <p style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 18, color: TEXT, letterSpacing: "-0.02em" }}>
                 {run.modelName}
@@ -401,8 +395,8 @@ function CompareModal({ a, b, onClose }: { a: RawRun; b: RawRun; onClose: () => 
   const ModelCard = ({ run, label, color }: { run: RawRun; label: string; color: string }) => (
     <div style={{ background: "#111", border: `1px solid ${color}44`, borderTop: `2px solid ${color}`, borderRadius: 8, padding: "14px 16px", minWidth: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-        <div style={{ width: 7, height: 7, backgroundColor: fwColor(run.frameworkId), borderRadius: 2, flexShrink: 0 }} />
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: fwColor(run.frameworkId), letterSpacing: "0.06em" }}>
+        <div style={{ width: 7, height: 7, backgroundColor: "#888", borderRadius: 2, flexShrink: 0 }} />
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED, letterSpacing: "0.06em" }}>
           {fwLabel(run.frameworkId)}
         </span>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: MUTED2, marginLeft: "auto", letterSpacing: "0.06em" }}>
@@ -537,22 +531,25 @@ function CompareTray({
           >
             Clear
           </button>
-          {canCompare && (
-            <button
-              onClick={onCompare}
-              style={{
-                background: "#FFFFFF", border: "none", borderRadius: 6,
-                padding: "8px 20px", cursor: "pointer",
-                fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 600,
-                color: "#111", letterSpacing: "0.04em",
-                transition: "opacity 120ms",
-              }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
-            >
-              Compare →
-            </button>
-          )}
+          <button
+            onClick={canCompare ? onCompare : undefined}
+            disabled={!canCompare}
+            style={{
+              background: canCompare ? "#FFFFFF" : "#2A2A2A",
+              border: "none", borderRadius: 6,
+              padding: "8px 20px",
+              cursor: canCompare ? "pointer" : "not-allowed",
+              fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 600,
+              color: canCompare ? "#111" : "#555",
+              letterSpacing: "0.04em",
+              transition: "opacity 120ms, background 120ms",
+              opacity: canCompare ? 1 : 0.5,
+            }}
+            onMouseEnter={(e) => { if (canCompare) (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+            onMouseLeave={(e) => { if (canCompare) (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+          >
+            Compare →
+          </button>
         </div>
       </div>
     </div>
@@ -614,14 +611,7 @@ function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
         }}>
           {fwLabel(run.frameworkId)}
         </span>
-        {run.isOfficial && (
-          <span className="sw-official" style={{
-            fontFamily: "var(--font-mono)", fontSize: 12, color: "#00EC97",
-            border: "1px solid #00EC97", padding: "2px 7px",
-            letterSpacing: "0.06em", textTransform: "uppercase",
-            marginLeft: "auto",
-          }}>OFFICIAL</span>
-        )}
+        {/* OFFICIAL badge hidden */}
       </div>
 
       {/* Model name + provider chip */}
@@ -710,7 +700,7 @@ function ScoreCard({ run, rank, onClick, onToggleCompare, isPinned }: {
             transition: "border-color 120ms, color 120ms",
           }}
         >
-          {isPinned ? "ADDED ✓" : "COMPARE"}
+          {isPinned ? "ADDED ✓" : "ADD TO COMPARE"}
         </button>
         <span style={{
           fontFamily: "var(--font-mono)", fontSize: 12, color,
@@ -881,76 +871,25 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
           ))}
         </div>
 
-        {/* ── CTA Banner ──────────────────────────────────────────────────── */}
-        <div
-          className="sw-cta"
-          style={{
-            marginTop: 40,
-            backgroundColor: "#1E1E1E",
-            borderRadius: 14,
-            padding: "28px 36px",
-            display: "flex",
-            alignItems: "center",
-            gap: 24,
-          }}
-        >
-          {/* Trophy emoji */}
-          <div style={{ fontSize: 64, lineHeight: 1, flexShrink: 0, userSelect: "none" }}>
-            🏆
-          </div>
-
-          {/* Text */}
-          <div style={{ flex: 1 }}>
-            <p style={{
-              margin: "0 0 6px",
-              fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 20,
-              color: "#FFFFFF", lineHeight: 1.2,
-            }}>
-              Ready to benchmark your agent?
-            </p>
-            <p style={{
-              margin: 0,
-              fontFamily: "var(--font-sans)", fontWeight: 400, fontSize: 14,
-              color: "#777777", lineHeight: 1.5,
-            }}>
-              Join the community of builders pushing the boundaries of AI agents.
-            </p>
-          </div>
-
-          {/* CTA Button */}
-          <a
-            href="#get-started"
-            className="sw-cta-btn"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 10, flexShrink: 0,
-              backgroundColor: "#C96A1A",
-              color: "#FFFFFF",
-              fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 16,
-              padding: "16px 36px",
-              borderRadius: 10,
-              textDecoration: "none",
-              letterSpacing: "-0.01em",
-              transition: "opacity 150ms",
-            }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.85"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
-          >
-            Get Started <span style={{ fontSize: 18 }}>→</span>
-          </a>
-        </div>
+        {/* CTA Banner — hidden until destination is ready */}
 
       </div>
 
       {selected && <TaskModal run={selected} onClose={() => setSelected(null)} />}
     </div>
 
-    {compareOpen && compareSelection.length === 2 && (
-      <CompareModal
-        a={compareSelection[0]}
-        b={compareSelection[1]}
-        onClose={() => setCompareOpen(false)}
-      />
-    )}
+    {compareOpen && compareSelection.length === 2 && (() => {
+      const [left, right] = compareSelection[0].passRate >= compareSelection[1].passRate
+        ? [compareSelection[0], compareSelection[1]]
+        : [compareSelection[1], compareSelection[0]];
+      return (
+        <CompareModal
+          a={left}
+          b={right}
+          onClose={() => setCompareOpen(false)}
+        />
+      );
+    })()}
 
     <CompareTray
       selection={compareSelection}
