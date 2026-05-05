@@ -56,10 +56,6 @@ const COLUMNS = [
     links: ["Benchmarks", "Leaderboard"],
   },
   {
-    heading: "Resources",
-    links: [],
-  },
-  {
     heading: "Community",
     links: ["GitHub"],
   },
