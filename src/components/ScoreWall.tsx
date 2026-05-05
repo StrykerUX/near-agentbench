@@ -584,13 +584,31 @@ function CompareTray({
 }
 
 // ── Score Card ────────────────────────────────────────────────────────────────
-function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
-  run: RawRun; rank: number; color: string;
+function ScoreCard({ run, rank, color, sortKey, onClick, onToggleCompare, isPinned }: {
+  run: RawRun; rank: number; color: string; sortKey: SortKey;
   onClick: () => void;
   onToggleCompare: (run: RawRun) => void;
   isPinned: boolean;
 }) {
-  const fwCol  = fwColor(run.frameworkId);
+  const fwCol = fwColor(run.frameworkId);
+
+  // Hero metric — changes based on active filter
+  const heroValue = sortKey === "speed" ? fmtTime(run.wallTimeMs)
+                  : sortKey === "cost"  ? fmtCost(run.costUsd)
+                  : sortKey === "value" ? Math.round(run.valueScore).toLocaleString()
+                  : `${(run.passRate * 100).toFixed(0)}%`;
+  const heroLabel = sortKey === "speed" ? "SPEED"
+                  : sortKey === "cost"  ? "COST"
+                  : sortKey === "value" ? "VALUE"
+                  : null;
+
+  // Stats grid — when a non-score filter is active, promote SCORE to top-left
+  // and remove the active metric (since it's now the hero)
+  const SCORE_STAT = { label: "SCORE", value: `${(run.passRate * 100).toFixed(0)}%` };
+  const gridStats = sortKey === "speed"  ? [SCORE_STAT, { label: "COST",  value: fmtCost(run.costUsd) },        { label: "AVG",   value: run.avgScore.toFixed(3) },    { label: "TASKS", value: `${run.scoreSum.toFixed(1)}/${run.totalTasks}` }]
+                  : sortKey === "cost"   ? [SCORE_STAT, { label: "TIME",  value: fmtTime(run.wallTimeMs) },     { label: "AVG",   value: run.avgScore.toFixed(3) },    { label: "TASKS", value: `${run.scoreSum.toFixed(1)}/${run.totalTasks}` }]
+                  : sortKey === "value"  ? [SCORE_STAT, { label: "COST",  value: fmtCost(run.costUsd) },        { label: "TIME",  value: fmtTime(run.wallTimeMs) },    { label: "AVG",   value: run.avgScore.toFixed(3) }]
+                  :                        [            { label: "COST",  value: fmtCost(run.costUsd) },        { label: "TIME",  value: fmtTime(run.wallTimeMs) },    { label: "AVG",   value: run.avgScore.toFixed(3) }, { label: "TASKS", value: `${run.scoreSum.toFixed(1)}/${run.totalTasks}` }];
 
   return (
     <div
@@ -662,15 +680,21 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
         )}
       </div>
 
-      {/* Hero score */}
+      {/* Hero metric */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {heroLabel && (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            {heroLabel}
+          </span>
+        )}
         <div style={{
-          fontFamily: "var(--font-inter)", fontWeight: 600, fontSize: 56,
-          color, lineHeight: 0.9, letterSpacing: "0.04em",
+          fontFamily: "var(--font-inter)", fontWeight: 600,
+          fontSize: sortKey === "score" ? 56 : 48,
+          color, lineHeight: 0.9, letterSpacing: "0.02em",
         }}>
-          {(run.passRate * 100).toFixed(0)}%
+          {heroValue}
         </div>
-        <PixelGauge percentage={run.passRate * 100} frameworkId={run.frameworkId} />
+        {sortKey === "score" && <PixelGauge percentage={run.passRate * 100} frameworkId={run.frameworkId} />}
       </div>
 
       {/* Suite / dataset */}
@@ -683,12 +707,7 @@ function ScoreCard({ run, rank, color, onClick, onToggleCompare, isPinned }: {
 
       {/* Stats 2×2 grid */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", rowGap: 12, columnGap: 16 }}>
-        {[
-          { label: "COST",  value: fmtCost(run.costUsd) },
-          { label: "TIME",  value: fmtTime(run.wallTimeMs) },
-          { label: "AVG",   value: run.avgScore.toFixed(3) },
-          { label: "TASKS", value: `${run.scoreSum.toFixed(1)}/${run.totalTasks}` },
-        ].map((s) => (
+        {gridStats.map((s) => (
           <div key={s.label} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <span style={{
               fontFamily: "var(--font-mono)", fontSize: 12, color: "#888",
@@ -908,6 +927,7 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
               run={run}
               rank={i + 1}
               color={rankColor(run, sort, sorted)}
+              sortKey={sort}
               onClick={() => setSelected(run)}
               onToggleCompare={toggleCompare}
               isPinned={compareSelection.some((r) => r.runId === run.runId)}
