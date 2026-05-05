@@ -45,8 +45,8 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: "NEAR AgentBench",
-  description: "Competitive benchmark for AI agents on NEAR Protocol",
+  title: "AgentBench",
+  description: "The open benchmark for evaluating AI agents across real-world tasks.",
 };
 
 export default function RootLayout({

@@ -795,10 +795,6 @@ function Navbar({ sortKey, onSort }: { sortKey: SortKey; onSort: (k: SortKey) =>
       >
         {/* Wordmark */}
         <div className="sw-wordmark" style={{ display: "flex", alignItems: "center", gap: 10, flex: 1 }}>
-          <span style={{ fontFamily: "var(--font-condensed)", fontSize: 18, color: TEXT, letterSpacing: "0.02em", lineHeight: 1 }}>
-            NEAR
-          </span>
-          <div style={{ width: 4, height: 4, backgroundColor: "#00EC97" }} />
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#00EC97", letterSpacing: "0.08em", lineHeight: 1 }}>
             AGENTBENCH
           </span>
