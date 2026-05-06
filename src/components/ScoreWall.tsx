@@ -601,7 +601,7 @@ function ListHeader({ sortKey }: { sortKey: SortKey }) {
       <div style={{ flex: 3, minWidth: 0, paddingRight: 16 }}>
         <span style={HDR}>MODEL</span>
       </div>
-      <div className="sw-list-col-fw" style={{ flex: "0 0 110px", paddingRight: 16 }}>
+      <div className="sw-list-col-fw" style={{ flex: "0 0 110px", paddingRight: 32 }}>
         <span style={HDR}>FW</span>
       </div>
       {cols.map((col, i) => (
@@ -691,7 +691,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
       </div>
 
       {/* Framework */}
-      <div className="sw-list-col-fw" style={{ flex: "0 0 110px", display: "flex", alignItems: "center", gap: 7, paddingRight: 16 }}>
+      <div className="sw-list-col-fw" style={{ flex: "0 0 110px", display: "flex", alignItems: "center", gap: 7, paddingRight: 32 }}>
         <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: fwCol, flexShrink: 0, display: "inline-block" }} />
         <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888", letterSpacing: "0.01em" }}>
           {fwLabel(run.frameworkId)}
@@ -707,7 +707,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
                 {col.value}
               </span>
               {(sortKey === "score" || sortKey === "value") && (
-                <div style={{ width: 72, height: 5, backgroundColor: "#2A2A2A", borderRadius: 3, overflow: "hidden" }}>
+                <div style={{ width: "100%", height: 5, backgroundColor: "#2A2A2A", borderRadius: 3, overflow: "hidden" }}>
                   <div style={{
                     width: `${sortKey === "score" ? run.passRate * 100 : Math.min(valuePct, 100)}%`,
                     height: "100%", backgroundColor: color, borderRadius: 3,
