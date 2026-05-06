@@ -597,7 +597,7 @@ function ListHeader({ sortKey }: { sortKey: SortKey }) {
       <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>RANK</span>
       </div>
-      <div style={{ flex: 1, minWidth: 0, paddingRight: 24 }}>
+      <div style={{ flex: "1 1 0", minWidth: 0, maxWidth: 260, paddingRight: 24 }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>MODEL</span>
       </div>
       <div className="sw-list-col-fw" style={{ width: 110, flexShrink: 0, paddingRight: 16 }}>
@@ -672,7 +672,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
       </div>
 
       {/* Model */}
-      <div style={{ flex: 1, minWidth: 0, paddingRight: 24, display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ flex: "1 1 0", minWidth: 0, maxWidth: 260, paddingRight: 24, display: "flex", flexDirection: "column", gap: 4 }}>
         <span style={{
           fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "#FFF",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
