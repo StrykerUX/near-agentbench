@@ -191,8 +191,6 @@ const RESPONSIVE = `
 `;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-export type { RawRun } from "@/lib/types";
-
 type SortKey = "score" | "speed" | "cost" | "value";
 
 // ── Pixel Gauge ───────────────────────────────────────────────────────────────
