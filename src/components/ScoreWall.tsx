@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import gsap from "gsap";
 import { fmtCost, fmtTime } from "@/lib/benchUtils";
 import type { RawRun } from "@/lib/types";
@@ -587,26 +587,27 @@ function ListHeader({ sortKey }: { sortKey: SortKey }) {
              : sortKey === "cost"  ? ["COST", "SCORE", "TIME", "AVG"]
              : sortKey === "value" ? ["VALUE", "SCORE", "COST", "TIME"]
              :                       ["SCORE", "COST",  "TIME", "AVG"];
+  const HDR: React.CSSProperties = { fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" };
   return (
     <div style={{
       display: "flex", alignItems: "center",
       borderLeft: "4px solid transparent",
       borderBottom: "1px solid #2A2A2A",
-      padding: "0 16px 0 12px", height: 36,
+      padding: "0 12px 0 12px", height: 36, gap: 0,
     }}>
-      <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>RANK</span>
+      <div style={{ flex: "0 0 48px", textAlign: "right", paddingRight: 16 }}>
+        <span style={HDR}>RANK</span>
       </div>
-      <div style={{ flex: "1 1 0", minWidth: 0, maxWidth: 260, paddingRight: 24 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>MODEL</span>
+      <div style={{ flex: 3, minWidth: 0, paddingRight: 16 }}>
+        <span style={HDR}>MODEL</span>
       </div>
-      <div className="sw-list-col-fw" style={{ width: 110, flexShrink: 0, paddingRight: 16 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>FW</span>
+      <div className="sw-list-col-fw" style={{ flex: "0 0 110px", paddingRight: 16 }}>
+        <span style={HDR}>FW</span>
       </div>
       {cols.map((col, i) => (
-        <div key={col} className={i > 0 ? "sw-list-col-sec" : ""} style={{ width: i === 0 ? 110 : 80, flexShrink: 0, paddingRight: 16 }}>
+        <div key={col} className={i > 0 ? "sw-list-col-sec" : ""} style={{ flex: i === 0 ? 2 : 1, paddingRight: 16 }}>
           <span style={{
-            fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase",
+            ...HDR,
             color: i === 0 ? sortColor : "#888",
             borderBottom: i === 0 ? `1px solid ${sortColor}` : "none",
             paddingBottom: i === 0 ? 2 : 0,
@@ -616,7 +617,9 @@ function ListHeader({ sortKey }: { sortKey: SortKey }) {
           </span>
         </div>
       ))}
-      <div style={{ width: 18, flexShrink: 0 }} />
+      <div style={{ flex: "0 0 72px", textAlign: "center" }}>
+        <span style={HDR}>COMPARE</span>
+      </div>
     </div>
   );
 }
@@ -665,14 +668,14 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
       onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
     >
       {/* Rank */}
-      <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
+      <div style={{ flex: "0 0 48px", textAlign: "right", paddingRight: 16 }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#888", letterSpacing: "0.04em" }}>
           #{rank}
         </span>
       </div>
 
       {/* Model */}
-      <div style={{ flex: "1 1 0", minWidth: 0, maxWidth: 260, paddingRight: 24, display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ flex: 3, minWidth: 0, paddingRight: 16, display: "flex", flexDirection: "column", gap: 4 }}>
         <span style={{
           fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "#FFF",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -688,7 +691,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
       </div>
 
       {/* Framework */}
-      <div className="sw-list-col-fw" style={{ width: 110, flexShrink: 0, display: "flex", alignItems: "center", gap: 7, paddingRight: 16 }}>
+      <div className="sw-list-col-fw" style={{ flex: "0 0 110px", display: "flex", alignItems: "center", gap: 7, paddingRight: 16 }}>
         <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: fwCol, flexShrink: 0, display: "inline-block" }} />
         <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888", letterSpacing: "0.01em" }}>
           {fwLabel(run.frameworkId)}
@@ -697,7 +700,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
 
       {/* Metric columns */}
       {cols.map((col, i) => (
-        <div key={col.label} className={i > 0 ? "sw-list-col-sec" : ""} style={{ width: i === 0 ? 110 : 80, flexShrink: 0, paddingRight: 16 }}>
+        <div key={col.label} className={i > 0 ? "sw-list-col-sec" : ""} style={{ flex: i === 0 ? 2 : 1, paddingRight: 16 }}>
           {col.primary ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 600, color, letterSpacing: "0.02em" }}>
@@ -723,7 +726,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
       {/* Compare checkbox */}
       <button
         onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
-        style={{ background: "none", border: "none", cursor: "pointer", padding: 0, flexShrink: 0 }}
+        style={{ flex: "0 0 72px", display: "flex", justifyContent: "center", background: "none", border: "none", cursor: "pointer", padding: 0 }}
       >
         <div style={{
           width: 18, height: 18,
