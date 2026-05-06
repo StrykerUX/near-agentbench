@@ -158,6 +158,12 @@ const RESPONSIVE = `
     .sw-cmp-actions { width: 100% !important; justify-content: flex-end !important; }
     .sw-compare-tray > div { padding: 12px 16px !important; }
   }
+  /* ── List view ── */
+  .sw-list-row { background: transparent; }
+  .sw-list-row:last-child { border-bottom: none !important; }
+  @media (max-width: 680px) {
+    .sw-list-col-fw, .sw-list-col-sec { display: none !important; }
+  }
   /* ── Compare modal grid ── */
   .cmp-header { display: grid; grid-template-columns: 1fr 32px 1fr; gap: 10px; align-items: start; padding: 20px 24px; }
   .cmp-tbl-head { display: grid; grid-template-columns: 140px 1fr 1fr 80px; gap: 12px; padding: 10px 0; border-bottom: 1px solid #2A2A2A; margin-bottom: 4px; }
@@ -583,6 +589,170 @@ function CompareTray({
   );
 }
 
+// ── List Header ───────────────────────────────────────────────────────────────
+function ListHeader({ sortKey }: { sortKey: SortKey }) {
+  const sortColor = SORT_COLOR[sortKey];
+  const cols = sortKey === "speed" ? ["TIME", "SCORE", "COST", "AVG"]
+             : sortKey === "cost"  ? ["COST", "SCORE", "TIME", "AVG"]
+             : sortKey === "value" ? ["VALUE", "SCORE", "COST", "TIME"]
+             :                       ["SCORE", "COST",  "TIME", "AVG"];
+  return (
+    <div style={{
+      display: "flex", alignItems: "center",
+      borderLeft: "4px solid transparent",
+      borderBottom: "1px solid #2A2A2A",
+      padding: "0 16px 0 12px", height: 36,
+    }}>
+      <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>RANK</span>
+      </div>
+      <div style={{ flex: 1, minWidth: 0, paddingRight: 24 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>MODEL</span>
+      </div>
+      <div className="sw-list-col-fw" style={{ width: 110, flexShrink: 0, paddingRight: 16 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>FW</span>
+      </div>
+      {cols.map((col, i) => (
+        <div key={col} className={i > 0 ? "sw-list-col-sec" : ""} style={{ width: i === 0 ? 110 : 80, flexShrink: 0, paddingRight: 16 }}>
+          <span style={{
+            fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase",
+            color: i === 0 ? sortColor : "#444",
+            borderBottom: i === 0 ? `1px solid ${sortColor}` : "none",
+            paddingBottom: i === 0 ? 2 : 0,
+            display: "inline-block",
+          }}>
+            {col}
+          </span>
+        </div>
+      ))}
+      <div style={{ width: 18, flexShrink: 0 }} />
+    </div>
+  );
+}
+
+// ── Score Row (List View) ─────────────────────────────────────────────────────
+function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompare, isPinned }: {
+  run: RawRun; rank: number; color: string; sortKey: SortKey; valuePct: number;
+  onClick: () => void; onToggleCompare: (run: RawRun) => void; isPinned: boolean;
+}) {
+  const fwCol = fwColor(run.frameworkId);
+  const cols = sortKey === "speed" ? [
+    { label: "TIME",  value: fmtTime(run.wallTimeMs),               primary: true  },
+    { label: "SCORE", value: `${(run.passRate * 100).toFixed(0)}%`, primary: false },
+    { label: "COST",  value: fmtCost(run.costUsd),                  primary: false },
+    { label: "AVG",   value: run.avgScore.toFixed(3),               primary: false },
+  ] : sortKey === "cost" ? [
+    { label: "COST",  value: fmtCost(run.costUsd),                  primary: true  },
+    { label: "SCORE", value: `${(run.passRate * 100).toFixed(0)}%`, primary: false },
+    { label: "TIME",  value: fmtTime(run.wallTimeMs),               primary: false },
+    { label: "AVG",   value: run.avgScore.toFixed(3),               primary: false },
+  ] : sortKey === "value" ? [
+    { label: "VALUE", value: valuePct.toFixed(2),                   primary: true  },
+    { label: "SCORE", value: `${(run.passRate * 100).toFixed(0)}%`, primary: false },
+    { label: "COST",  value: fmtCost(run.costUsd),                  primary: false },
+    { label: "TIME",  value: fmtTime(run.wallTimeMs),               primary: false },
+  ] : [
+    { label: "SCORE", value: `${(run.passRate * 100).toFixed(0)}%`, primary: true  },
+    { label: "COST",  value: fmtCost(run.costUsd),                  primary: false },
+    { label: "TIME",  value: fmtTime(run.wallTimeMs),               primary: false },
+    { label: "AVG",   value: run.avgScore.toFixed(3),               primary: false },
+  ];
+
+  return (
+    <div
+      onClick={onClick}
+      className="sw-list-row"
+      style={{
+        display: "flex", alignItems: "center",
+        borderLeft: `4px solid ${color}`,
+        borderBottom: "1px solid #222",
+        padding: "0 16px 0 12px",
+        minHeight: 58, cursor: "pointer", gap: 0,
+        transition: "background 120ms",
+      }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = "#1E1E1E"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+    >
+      {/* Rank */}
+      <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#555", letterSpacing: "0.04em" }}>
+          #{rank}
+        </span>
+      </div>
+
+      {/* Model */}
+      <div style={{ flex: 1, minWidth: 0, paddingRight: 24, display: "flex", flexDirection: "column", gap: 4 }}>
+        <span style={{
+          fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, color: "#FFF",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {run.modelName}
+        </span>
+        <span style={{
+          fontFamily: "var(--font-mono)", fontSize: 11, color: "#555", letterSpacing: "0.06em",
+          textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {run.provider}{run.suite ? ` · ${run.suite}` : ""}
+        </span>
+      </div>
+
+      {/* Framework */}
+      <div className="sw-list-col-fw" style={{ width: 110, flexShrink: 0, display: "flex", alignItems: "center", gap: 7, paddingRight: 16 }}>
+        <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: fwCol, flexShrink: 0, display: "inline-block" }} />
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: 13, color: "#888", letterSpacing: "0.01em" }}>
+          {fwLabel(run.frameworkId)}
+        </span>
+      </div>
+
+      {/* Metric columns */}
+      {cols.map((col, i) => (
+        <div key={col.label} className={i > 0 ? "sw-list-col-sec" : ""} style={{ width: i === 0 ? 110 : 80, flexShrink: 0, paddingRight: 16 }}>
+          {col.primary ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 600, color, letterSpacing: "0.02em" }}>
+                {col.value}
+              </span>
+              {(sortKey === "score" || sortKey === "value") && (
+                <div style={{ width: 72, height: 5, backgroundColor: "#2A2A2A", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{
+                    width: `${sortKey === "score" ? run.passRate * 100 : Math.min(valuePct, 100)}%`,
+                    height: "100%", backgroundColor: color, borderRadius: 3,
+                  }} />
+                </div>
+              )}
+            </div>
+          ) : (
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#666" }}>
+              {col.value}
+            </span>
+          )}
+        </div>
+      ))}
+
+      {/* Compare checkbox */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onToggleCompare(run); }}
+        style={{ background: "none", border: "none", cursor: "pointer", padding: 0, flexShrink: 0 }}
+      >
+        <div style={{
+          width: 18, height: 18,
+          border: `2px solid ${isPinned ? color : "#444"}`,
+          borderRadius: 3,
+          backgroundColor: isPinned ? color : "transparent",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "background 120ms, border-color 120ms",
+        }}>
+          {isPinned && (
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+              <path d="M1 4L3.5 6.5L9 1" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+}
+
 // ── Score Card ────────────────────────────────────────────────────────────────
 function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompare, isPinned }: {
   run: RawRun; rank: number; color: string; sortKey: SortKey; valuePct: number;
@@ -788,7 +958,10 @@ function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompa
 }
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
-function Navbar({ sortKey, onSort }: { sortKey: SortKey; onSort: (k: SortKey) => void }) {
+function Navbar({ sortKey, onSort, viewMode, onViewMode }: {
+  sortKey: SortKey; onSort: (k: SortKey) => void;
+  viewMode: "grid" | "list"; onViewMode: (m: "grid" | "list") => void;
+}) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10);
@@ -849,6 +1022,39 @@ function Navbar({ sortKey, onSort }: { sortKey: SortKey; onSort: (k: SortKey) =>
           })}
         </div>
 
+        {/* View toggle */}
+        <div style={{ display: "flex", gap: 4, marginLeft: 8 }}>
+          {(["grid", "list"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => onViewMode(m)}
+              title={m === "grid" ? "Grid view" : "List view"}
+              style={{
+                width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
+                background: "none", border: `1px solid ${viewMode === m ? "#555" : "transparent"}`,
+                borderRadius: 6, cursor: "pointer",
+                color: viewMode === m ? "#FFF" : "#555",
+                transition: "color 120ms, border-color 120ms",
+              }}
+            >
+              {m === "grid" ? (
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <rect x="1" y="1" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                  <rect x="8.5" y="1" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                  <rect x="1" y="8.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                  <rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1" fill="currentColor" />
+                </svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <rect x="1" y="2.5" width="13" height="2" rx="1" fill="currentColor" />
+                  <rect x="1" y="6.5" width="13" height="2" rx="1" fill="currentColor" />
+                  <rect x="1" y="10.5" width="13" height="2" rx="1" fill="currentColor" />
+                </svg>
+              )}
+            </button>
+          ))}
+        </div>
+
       </div>
     </nav>
   );
@@ -857,6 +1063,7 @@ function Navbar({ sortKey, onSort }: { sortKey: SortKey; onSort: (k: SortKey) =>
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; generatedAt: string }) {
   const [sort, setSort]               = useState<SortKey>("score");
+  const [viewMode, setViewMode]       = useState<"grid" | "list">("grid");
   const [selected, setSelected]       = useState<RawRun | null>(null);
   const [compareSelection, setCompareSelection] = useState<RawRun[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
@@ -921,41 +1128,50 @@ export default function ScoreWall({ runs, generatedAt }: { runs: RawRun[]; gener
         </div>
 
         {/* ── Navbar (sort controls) ───────────────────────────────────────── */}
-        <Navbar sortKey={sort} onSort={setSort} />
+        <Navbar sortKey={sort} onSort={setSort} viewMode={viewMode} onViewMode={setViewMode} />
 
-        {/* ── Cards grid ──────────────────────────────────────────────────── */}
-        <div
-          className="sw-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${sorted.length <= 4 ? 2 : sorted.length <= 9 ? 3 : 4}, 1fr)`,
-            gap: 20,
-            marginTop: 24,
-          }}
-        >
-          {(() => {
-            const values = sorted.map((r) => r.valueScore);
-            const logMin = Math.log1p(Math.min(...values));
-            const logMax = Math.log1p(Math.max(...values));
-            return sorted.map((run, i) => {
-              const logVal = Math.log1p(run.valueScore);
-              const pct    = logMax === logMin ? 100 : 10 + ((logVal - logMin) / (logMax - logMin)) * 90;
-              return (
-                <ScoreCard
-                  key={run.runId}
-                  run={run}
-                  rank={i + 1}
-                  color={rankColor(run, sort, sorted)}
-                  sortKey={sort}
-                  valuePct={pct}
-                  onClick={() => setSelected(run)}
-                  onToggleCompare={toggleCompare}
-                  isPinned={compareSelection.some((r) => r.runId === run.runId)}
-                />
-              );
-            });
-          })()}
-        </div>
+        {/* ── Cards grid / List view ──────────────────────────────────────── */}
+        {(() => {
+          const values = sorted.map((r) => r.valueScore);
+          const logMin = Math.log1p(Math.min(...values));
+          const logMax = Math.log1p(Math.max(...values));
+          const rowProps = (run: RawRun, i: number) => {
+            const logVal = Math.log1p(run.valueScore);
+            const pct    = logMax === logMin ? 100 : 10 + ((logVal - logMin) / (logMax - logMin)) * 90;
+            return {
+              run,
+              rank: i + 1,
+              color: rankColor(run, sort, sorted),
+              sortKey: sort,
+              valuePct: pct,
+              onClick: () => setSelected(run),
+              onToggleCompare: toggleCompare,
+              isPinned: compareSelection.some((r) => r.runId === run.runId),
+            };
+          };
+
+          if (viewMode === "list") {
+            return (
+              <div style={{ marginTop: 24, borderRadius: 10, overflow: "hidden", border: "1px solid #2A2A2A" }}>
+                <ListHeader sortKey={sort} />
+                {sorted.map((run, i) => <ScoreRow key={run.runId} {...rowProps(run, i)} />)}
+              </div>
+            );
+          }
+
+          return (
+            <div
+              className="sw-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${sorted.length <= 4 ? 2 : sorted.length <= 9 ? 3 : 4}, 1fr)`,
+                gap: 20, marginTop: 24,
+              }}
+            >
+              {sorted.map((run, i) => <ScoreCard key={run.runId} {...rowProps(run, i)} />)}
+            </div>
+          );
+        })()}
 
         {/* CTA Banner — hidden until destination is ready */}
 
