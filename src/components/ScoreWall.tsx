@@ -20,8 +20,8 @@ const FW: Record<string, { main: string; blocks: [string, string] }> = {
   openclaw: { main: "#00EC97", blocks: ["#2979FF", "#00EC97"] },
   value:    { main: "#FFB800", blocks: ["#FF6B00", "#FFB800"] },
 };
-const fwColor  = (id: string) => FW[id]?.main ?? "#555";
-const fwBlocks = (id: string): [string, string] => FW[id]?.blocks ?? ["#555", "#555"];
+const fwColor  = (id: string) => FW[id]?.main ?? "#888";
+const fwBlocks = (id: string): [string, string] => FW[id]?.blocks ?? ["#888", "#888"];
 const fwLabel  = (id: string) => id === "ironclaw" ? "IronClaw" : id === "openclaw" ? "OpenClaw" : id;
 
 // Traffic-light score color
@@ -128,9 +128,9 @@ const RESPONSIVE = `
     position: absolute; top: 10px; left: 10px;
     width: 26px; height: 26px;
     border-radius: 6px;
-    border: 1px solid #444;
+    border: 1px solid #888;
     background: #1C1C1C;
-    color: #666;
+    color: #888;
     font-size: 16px; line-height: 1;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; z-index: 2;
@@ -604,19 +604,19 @@ function ListHeader({ sortKey }: { sortKey: SortKey }) {
       padding: "0 16px 0 12px", height: 36,
     }}>
       <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>RANK</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>RANK</span>
       </div>
       <div style={{ flex: 1, minWidth: 0, paddingRight: 24 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>MODEL</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>MODEL</span>
       </div>
       <div className="sw-list-col-fw" style={{ width: 110, flexShrink: 0, paddingRight: 16 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444", letterSpacing: "0.1em", textTransform: "uppercase" }}>FW</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase" }}>FW</span>
       </div>
       {cols.map((col, i) => (
         <div key={col} className={i > 0 ? "sw-list-col-sec" : ""} style={{ width: i === 0 ? 110 : 80, flexShrink: 0, paddingRight: 16 }}>
           <span style={{
             fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase",
-            color: i === 0 ? sortColor : "#444",
+            color: i === 0 ? sortColor : "#888",
             borderBottom: i === 0 ? `1px solid ${sortColor}` : "none",
             paddingBottom: i === 0 ? 2 : 0,
             display: "inline-block",
@@ -675,7 +675,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
     >
       {/* Rank */}
       <div style={{ width: 52, flexShrink: 0, textAlign: "right", paddingRight: 16 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#555", letterSpacing: "0.04em" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#888", letterSpacing: "0.04em" }}>
           #{rank}
         </span>
       </div>
@@ -689,7 +689,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
           {run.modelName}
         </span>
         <span style={{
-          fontFamily: "var(--font-mono)", fontSize: 11, color: "#555", letterSpacing: "0.06em",
+          fontFamily: "var(--font-mono)", fontSize: 11, color: "#888", letterSpacing: "0.06em",
           textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>
           {run.provider}{run.suite ? ` · ${run.suite}` : ""}
@@ -722,7 +722,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
               )}
             </div>
           ) : (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#666" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#888" }}>
               {col.value}
             </span>
           )}
@@ -736,7 +736,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
       >
         <div style={{
           width: 18, height: 18,
-          border: `2px solid ${isPinned ? color : "#444"}`,
+          border: `2px solid ${isPinned ? color : "#888"}`,
           borderRadius: 3,
           backgroundColor: isPinned ? color : "transparent",
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -817,7 +817,7 @@ function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompa
 
       {/* Top: framework badge + OFFICIAL */}
       <div className="sw-badge-row" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <div style={{ width: 12, height: 12, backgroundColor: "#555", borderRadius: 2, flexShrink: 0 }} />
+        <div style={{ width: 12, height: 12, backgroundColor: "#888", borderRadius: 2, flexShrink: 0 }} />
         <span style={{
           fontFamily: "var(--font-sans)", fontWeight: 600, fontSize: 13,
           color: "#888", letterSpacing: "0.01em",
@@ -931,7 +931,7 @@ function ScoreCard({ run, rank, color, sortKey, valuePct, onClick, onToggleCompa
         {/* Checkbox */}
         <div style={{
           width: 18, height: 18, flexShrink: 0,
-          border: `2px solid ${isPinned ? color : "#555"}`,
+          border: `2px solid ${isPinned ? color : "#888"}`,
           borderRadius: 3,
           backgroundColor: isPinned ? color : "transparent",
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -1031,9 +1031,9 @@ function Navbar({ sortKey, onSort, viewMode, onViewMode }: {
               title={m === "grid" ? "Grid view" : "List view"}
               style={{
                 width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
-                background: "none", border: `1px solid ${viewMode === m ? "#555" : "transparent"}`,
+                background: "none", border: `1px solid ${viewMode === m ? "#888" : "transparent"}`,
                 borderRadius: 6, cursor: "pointer",
-                color: viewMode === m ? "#FFF" : "#555",
+                color: viewMode === m ? "#FFF" : "#888",
                 transition: "color 120ms, border-color 120ms",
               }}
             >
