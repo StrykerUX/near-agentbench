@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import gsap from "gsap";
 import { fmtCost, fmtTime } from "@/lib/benchUtils";
-import type { TaskResult } from "@/lib/benchUtils";
+import type { RawRun } from "@/lib/types";
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const BG        = "#111111";
@@ -191,16 +191,7 @@ const RESPONSIVE = `
 `;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-export interface RawRun {
-  runId: string; frameworkId: string;
-  modelName: string; provider: string;
-  suite: string; dataset: string;
-  passRate: number; avgScore: number;
-  costUsd: number; wallTimeMs: number;
-  totalTasks: number; scoreSum: number;
-  valueScore: number; isOfficial: boolean;
-  tasks: TaskResult[];
-}
+export type { RawRun } from "@/lib/types";
 
 type SortKey = "score" | "speed" | "cost" | "value";
 

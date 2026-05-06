@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
-import ScoreWall, { type RawRun } from "@/components/ScoreWall";
+import ScoreWall from "@/components/ScoreWall";
+import type { RawRun } from "@/lib/types";
 import { getIronclawLeaderboard, getLeaderboard } from "@/lib/api";
 
 function normalizeModel(modelId: string) {

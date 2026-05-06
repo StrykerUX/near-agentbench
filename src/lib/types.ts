@@ -132,6 +132,18 @@ export interface IronclawLeaderboard {
   runs: IronclawRun[];
 }
 
+// ── ScoreWall shared type ────────────────────────────────────────────────────
+export interface RawRun {
+  runId: string; frameworkId: string;
+  modelName: string; provider: string;
+  suite: string; dataset: string;
+  passRate: number; avgScore: number;
+  costUsd: number; wallTimeMs: number;
+  totalTasks: number; scoreSum: number;
+  valueScore: number; isOfficial: boolean;
+  tasks: import("./benchUtils").TaskResult[];
+}
+
 // Groups submissions by benchmark_version → model+provider
 export type VersionGroup = {
   versionId: string;
