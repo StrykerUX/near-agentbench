@@ -722,7 +722,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
               )}
             </div>
           ) : (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#888" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#D4D4D4" }}>
               {col.value}
             </span>
           )}
