@@ -603,7 +603,7 @@ function ListHeader({ sortKey }: { sortKey: SortKey }) {
         <span style={HDR}>FW</span>
       </div>
       {cols.map((col, i) => (
-        <div key={col} className={i > 0 ? "sw-list-col-sec" : ""} style={{ flex: i === 0 ? 2 : 1, paddingRight: 16 }}>
+        <div key={col} className={i > 0 ? "sw-list-col-sec" : ""} style={{ flex: i === 0 ? 2 : 1, paddingRight: i === 0 ? 32 : 16 }}>
           <span style={{
             ...HDR,
             color: i === 0 ? sortColor : "#888",
@@ -698,7 +698,7 @@ function ScoreRow({ run, rank, color, sortKey, valuePct, onClick, onToggleCompar
 
       {/* Metric columns */}
       {cols.map((col, i) => (
-        <div key={col.label} className={i > 0 ? "sw-list-col-sec" : ""} style={{ flex: i === 0 ? 2 : 1, paddingRight: 16 }}>
+        <div key={col.label} className={i > 0 ? "sw-list-col-sec" : ""} style={{ flex: i === 0 ? 2 : 1, paddingRight: i === 0 ? 32 : 16 }}>
           {col.primary ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 600, color, letterSpacing: "0.02em" }}>
